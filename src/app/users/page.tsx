@@ -1,15 +1,16 @@
 "use client";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
-import { initialUsers } from "@/data/users";
 import { User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
+import { generateUsers } from "@/utils/generateUsers";
 import { sortItems } from "@/utils/sortItems";
 import { useMemo, useState } from "react";
 
 const Userpage = () => {
+  const initialUser = generateUsers(200);
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>(initialUser);
   const [sortBy, setSortBy] = useState<keyof User>("id");
 
   const visibleUsers = useMemo(() => {
