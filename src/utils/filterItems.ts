@@ -1,7 +1,7 @@
-export const filterItems = <T extends Record<string, any>>(
+export const filterItems = <T, K extends readonly (keyof T)[]>(
   items: T[],
   search: string,
-  keys: (keyof T)[]
+  keys: K
 ): T[] => {
   if (!search.trim()) return items;
 
