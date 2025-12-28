@@ -1,4 +1,7 @@
-const UsersToolbar = () => {
+interface UsersToolbarProps {
+  onSearchChange: (value: string) => void;
+}
+const UsersToolbar = ({ onSearchChange }: UsersToolbarProps) => {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
       <div className="relative w-full max-w-sm">
@@ -21,6 +24,7 @@ const UsersToolbar = () => {
             focus:ring-1
             focus:ring-blue-500
           "
+          onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
     </div>
