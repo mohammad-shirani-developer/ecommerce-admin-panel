@@ -1,18 +1,28 @@
-export const sortItems = <T extends Record<string, any>>(
+export type SortDirection = "asc" | "desc";
+
+export const sortItems = <T, K extends keyof T>(
   items: T[],
-  sortBy: keyof T,
-  direction: "asc" | "desc" = "asc"
+  sortBy: K,
+  direction: SortDirection = "asc"
 ): T[] => {
   return [...items].sort((a, b) => {
     const aVal = a[sortBy];
     const bVal = b[sortBy];
 
+    if (aVal == null || bVal == null) return 0;
+
+    // number
     if (typeof aVal === "number" && typeof bVal === "number") {
       return direction === "asc" ? aVal - bVal : bVal - aVal;
     }
 
-    return direction === "asc"
-      ? String(aVal).localeCompare(String(bVal))
-      : String(bVal).localeCompare(String(aVal));
+    // string
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return direction === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+
+    return 0;
   });
 };
