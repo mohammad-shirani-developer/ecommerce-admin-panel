@@ -1,7 +1,8 @@
 "use client";
 import ConfirmModal from "@/components/common/ConfirmModal";
+import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
-import EditUserModal from "@/components/users/EditUserModal";
+import EditUserForm from "@/components/users/EditUserForm";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
 import { users as mockUsers } from "@/data/users";
@@ -116,12 +117,14 @@ const Userpage = () => {
         currentPage={page}
         onPageChange={setPage}
       />
-      <EditUserModal
-        user={editUser}
+      <FormModal
         isOpen={isModalOpen}
+        title="ویرایش کاربر"
         onClose={handleCloseModal}
-        onSave={handleSaveUser}
-      />
+      >
+        <EditUserForm user={editUser} onSave={handleSaveUser} />
+      </FormModal>
+
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="حذف کاربر"
