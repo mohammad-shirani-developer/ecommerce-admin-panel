@@ -2,11 +2,12 @@
 import ConfirmModal from "@/components/common/ConfirmModal";
 import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
+import CreateUserForm from "@/components/users/CreateUserForm";
 import EditUserForm from "@/components/users/EditUserForm";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
 import { users as mockUsers } from "@/data/users";
-import { User } from "@/types/user";
+import { CreateUserInput, User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
@@ -24,6 +25,7 @@ const Userpage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleStatusClick = (userId: number) => {
     setUsers((prevUsers) =>
@@ -93,6 +95,21 @@ const Userpage = () => {
     }
   };
 
+  const handleCreateUser = (data: CreateUserInput) => {
+    const nextId =
+      users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+
+    setUsers((prev) => [
+      {
+        id: nextId,
+        ...data,
+      },
+      ...prev,
+    ]);
+
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">کاربران</h1>
@@ -101,6 +118,7 @@ const Userpage = () => {
           setSearch(v);
           setPage(1);
         }}
+        setIsCreateModalOpen={setIsCreateModalOpen}
       />
       <UsersTable
         users={paginatedUsers}
@@ -133,6 +151,13 @@ const Userpage = () => {
         onCancel={handleCloseDeleteModal}
         onConfirm={() => handleDeletedUser(deleteUser!)}
       />
+      <FormModal
+        isOpen={isCreateModalOpen}
+        title="افزودن کاربر"
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <CreateUserForm onCreate={handleCreateUser} />
+      </FormModal>
     </div>
   );
 };
