@@ -1,5 +1,6 @@
 "use client";
 import Pagination from "@/components/common/Pagination";
+import EditUserModal from "@/components/users/EditUserModal";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
 import { User } from "@/types/user";
@@ -17,6 +18,8 @@ const Userpage = () => {
   const [users, setUsers] = useState<User[]>(initialUser);
   const [sortBy, setSortBy] = useState<keyof User>("id");
   const [page, setPage] = useState(1);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleStatusClick = (userId: number) => {
     setUsers((prevUsers) =>
@@ -42,6 +45,24 @@ const Userpage = () => {
     [processedUsers, page]
   );
 
+  const handleEditUser = (user: User) => {
+    setEditUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handelSaveUser = (updatedUser: User) => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+    );
+    setEditUser(null);
+    setIsModalOpen(false);
+  };
+
+  const handleCloseModal = () => {
+    setEditUser(null);
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">کاربران</h1>
@@ -51,12 +72,22 @@ const Userpage = () => {
           setPage(1); // 👈 مهم
         }}
       />
-      <UsersTable users={paginatedUsers} onToggleStatus={handleStatusClick} />
+      <UsersTable
+        users={paginatedUsers}
+        onToggleStatus={handleStatusClick}
+        onEdit={handleEditUser}
+      />
       <Pagination
         total={processedUsers.length}
         pageSize={PAGE_SIZE}
         currentPage={page}
         onPageChange={setPage}
+      />
+      <EditUserModal
+        user={editUser}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handelSaveUser}
       />
     </div>
   );

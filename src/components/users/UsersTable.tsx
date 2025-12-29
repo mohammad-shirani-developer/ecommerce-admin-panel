@@ -1,12 +1,14 @@
 import { User } from "@/types/user";
+import { MdOutlineModeEdit } from "react-icons/md";
 import UserStatusBadge from "./UserStatusBadge";
 
 interface UsersTableProps {
   users: User[];
   onToggleStatus: (userId: number) => void;
+  onEdit: (user: User) => void;
 }
 
-const UsersTable = ({ users, onToggleStatus }: UsersTableProps) => {
+const UsersTable = ({ users, onToggleStatus, onEdit }: UsersTableProps) => {
   return (
     <table className="w-full text-right table-auto border border-gray-700 text-sm">
       <thead className="bg-gray-800 text-gray-200">
@@ -30,8 +32,10 @@ const UsersTable = ({ users, onToggleStatus }: UsersTableProps) => {
                 onClick={() => onToggleStatus(user.id)}
               />
             </td>
-            <td className="py-2 px-4 border-b border-gray-700 text-left">
-              {/* future actions */}
+            <td className="py-2 px-4 border-b border-gray-700">
+              <button className="p-1" onClick={() => onEdit(user)}>
+                <MdOutlineModeEdit className="text-gray-500 hover:text-gray-300 cursor-pointer text-2xl border-none" />
+              </button>
             </td>
           </tr>
         ))}
