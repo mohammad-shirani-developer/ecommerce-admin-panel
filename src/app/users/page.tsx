@@ -4,20 +4,20 @@ import DeleteUserModal from "@/components/users/DeleteUserModal";
 import EditUserModal from "@/components/users/EditUserModal";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
+import { users as mockUsers } from "@/data/users";
 import { User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
-import { generateUsers } from "@/utils/generateUsers";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
 import { useMemo, useState } from "react";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 const Userpage = () => {
-  const initialUser = generateUsers(20);
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<User[]>(initialUser);
+  const [users, setUsers] = useState<User[]>(mockUsers);
   const [sortBy, setSortBy] = useState<keyof User>("id");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,9 +39,9 @@ const Userpage = () => {
 
   const processedUsers = useMemo(() => {
     const filtered = filterItems(users, search, ["name", "email"]);
-    const sorted = sortItems(filtered, sortBy);
+    const sorted = sortItems(filtered, sortBy, sortDirection);
     return sorted;
-  }, [users, search, sortBy]);
+  }, [users, search, sortBy, sortDirection]);
 
   const paginatedUsers = useMemo(
     () => paginate(processedUsers, page, PAGE_SIZE),
@@ -81,6 +81,17 @@ const Userpage = () => {
     setIsDeleteModalOpen(false);
   };
 
+  const handleSort = (key: keyof User) => {
+    setPage(1);
+
+    if (sortBy === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDirection("asc");
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">کاربران</h1>
@@ -95,6 +106,9 @@ const Userpage = () => {
         onToggleStatus={handleStatusClick}
         onEdit={handleEditUser}
         onDelete={handleDeleteUser}
+        onSort={handleSort}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
       />
       <Pagination
         total={processedUsers.length}

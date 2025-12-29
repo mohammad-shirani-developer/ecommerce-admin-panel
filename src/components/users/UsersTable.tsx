@@ -7,6 +7,9 @@ interface UsersTableProps {
   onToggleStatus: (userId: number) => void;
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
+  onSort: (key: keyof User) => void;
+  sortBy: keyof User;
+  sortDirection: "asc" | "desc";
 }
 
 const UsersTable = ({
@@ -14,14 +17,32 @@ const UsersTable = ({
   onToggleStatus,
   onEdit,
   onDelete,
+  onSort,
+  sortBy,
+  sortDirection,
 }: UsersTableProps) => {
   return (
     <table className="w-full text-right table-auto border border-gray-700 text-sm">
       <thead className="bg-gray-800 text-gray-200">
         <tr className="bg-gray-800">
-          <th className="py-2 px-4 border-b border-gray-700">ID</th>
-          <th className="py-2 px-4 border-b border-gray-700">نام</th>
-          <th className="py-2 px-4 border-b border-gray-700">ایمیل</th>
+          <th
+            onClick={() => onSort("id")}
+            className="cursor-pointer select-none"
+          >
+            ID {sortBy === "id" && (sortDirection === "asc" ? "▲" : "▼")}
+          </th>
+          <th
+            onClick={() => onSort("name")}
+            className="cursor-pointer select-none"
+          >
+            نام {sortBy === "name" && (sortDirection === "asc" ? "▲" : "▼")}
+          </th>
+          <th
+            onClick={() => onSort("email")}
+            className="cursor-pointer select-none"
+          >
+            ایمیل {sortBy === "email" && (sortDirection === "asc" ? "▲" : "▼")}
+          </th>
           <th className="py-2 px-4 border-b border-gray-700">وضعیت</th>
           <th className="py-2 px-4 border-b border-gray-700">عملیات</th>
         </tr>
