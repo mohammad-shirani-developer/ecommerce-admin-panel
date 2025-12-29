@@ -3,9 +3,10 @@ import UserStatusBadge from "./UserStatusBadge";
 
 interface UsersTableProps {
   users: User[];
+  onToggleStatus: (userId: number) => void;
 }
 
-const UsersTable = ({ users }: UsersTableProps) => {
+const UsersTable = ({ users, onToggleStatus }: UsersTableProps) => {
   return (
     <table className="w-full text-right table-auto border border-gray-700 text-sm">
       <thead className="bg-gray-800 text-gray-200">
@@ -24,7 +25,10 @@ const UsersTable = ({ users }: UsersTableProps) => {
             <td className="py-2 px-4 border-b border-gray-700">{user.name}</td>
             <td className="py-2 px-4 border-b border-gray-700">{user.email}</td>
             <td className="py-2 px-4 border-b border-gray-700">
-              <UserStatusBadge status={user.status} />
+              <UserStatusBadge
+                status={user.status}
+                onClick={() => onToggleStatus(user.id)}
+              />
             </td>
             <td className="py-2 px-4 border-b border-gray-700 text-left">
               {/* future actions */}

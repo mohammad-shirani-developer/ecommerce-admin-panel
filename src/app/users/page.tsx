@@ -18,6 +18,19 @@ const Userpage = () => {
   const [sortBy, setSortBy] = useState<keyof User>("id");
   const [page, setPage] = useState(1);
 
+  const handleStatusClick = (userId: number) => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.id === userId
+          ? {
+              ...user,
+              status: user.status === "active" ? "inactive" : "active",
+            }
+          : user
+      )
+    );
+  };
+
   const processedUsers = useMemo(() => {
     const filtered = filterItems(users, search, ["name", "email"]);
     const sorted = sortItems(filtered, sortBy);
@@ -38,7 +51,7 @@ const Userpage = () => {
           setPage(1); // 👈 مهم
         }}
       />
-      <UsersTable users={paginatedUsers} />
+      <UsersTable users={paginatedUsers} onToggleStatus={handleStatusClick} />
       <Pagination
         total={processedUsers.length}
         pageSize={PAGE_SIZE}
