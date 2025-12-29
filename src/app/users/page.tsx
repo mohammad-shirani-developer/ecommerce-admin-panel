@@ -1,5 +1,6 @@
 "use client";
 import Pagination from "@/components/common/Pagination";
+import DeleteUserModal from "@/components/users/DeleteUserModal";
 import EditUserModal from "@/components/users/EditUserModal";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
@@ -20,6 +21,8 @@ const Userpage = () => {
   const [page, setPage] = useState(1);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleStatusClick = (userId: number) => {
     setUsers((prevUsers) =>
@@ -49,18 +52,33 @@ const Userpage = () => {
     setEditUser(user);
     setIsModalOpen(true);
   };
+  const handleDeleteUser = (user: User) => {
+    setDeleteUser(user);
+    setIsDeleteModalOpen(true);
+  };
 
-  const handelSaveUser = (updatedUser: User) => {
+  const handleSaveUser = (updatedUser: User) => {
     setUsers((prevUsers) =>
       prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
     );
     setEditUser(null);
     setIsModalOpen(false);
   };
+  const handleDeletedUser = (updatedUser: User) => {
+    setUsers((prevUsers) =>
+      prevUsers.filter((user) => user.id !== updatedUser.id)
+    );
+    setDeleteUser(null);
+    setIsDeleteModalOpen(false);
+  };
 
   const handleCloseModal = () => {
     setEditUser(null);
     setIsModalOpen(false);
+  };
+  const handleCloseDeleteModal = () => {
+    setDeleteUser(null);
+    setIsDeleteModalOpen(false);
   };
 
   return (
@@ -69,13 +87,14 @@ const Userpage = () => {
       <UsersToolbar
         onSearchChange={(v) => {
           setSearch(v);
-          setPage(1); // 👈 مهم
+          setPage(1);
         }}
       />
       <UsersTable
         users={paginatedUsers}
         onToggleStatus={handleStatusClick}
         onEdit={handleEditUser}
+        onDelete={handleDeleteUser}
       />
       <Pagination
         total={processedUsers.length}
@@ -87,7 +106,13 @@ const Userpage = () => {
         user={editUser}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSave={handelSaveUser}
+        onSave={handleSaveUser}
+      />
+      <DeleteUserModal
+        user={deleteUser}
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onDelete={handleDeletedUser}
       />
     </div>
   );
