@@ -1,6 +1,6 @@
 "use client";
+import ConfirmModal from "@/components/common/ConfirmModal";
 import Pagination from "@/components/common/Pagination";
-import DeleteUserModal from "@/components/users/DeleteUserModal";
 import EditUserModal from "@/components/users/EditUserModal";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
@@ -122,11 +122,13 @@ const Userpage = () => {
         onClose={handleCloseModal}
         onSave={handleSaveUser}
       />
-      <DeleteUserModal
-        user={deleteUser}
+      <ConfirmModal
         isOpen={isDeleteModalOpen}
-        onClose={handleCloseDeleteModal}
-        onDelete={handleDeletedUser}
+        title="حذف کاربر"
+        message={`آیا از حذف ${deleteUser?.name} مطمئن هستید؟`}
+        confirmText="حذف"
+        onCancel={handleCloseDeleteModal}
+        onConfirm={() => handleDeletedUser(deleteUser!)}
       />
     </div>
   );
