@@ -6,3 +6,5 @@ export interface User {
   email: string;
   status: UserStatus;
 }
+
+export type CreateUserInput = Omit<User, "id">;

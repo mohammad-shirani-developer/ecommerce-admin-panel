@@ -1,11 +1,11 @@
-interface UsersToolbarProps {
+interface ProductsToolbarProps {
   onSearchChange: (value: string) => void;
   setIsCreateModalOpen: (isOpen: boolean) => void;
 }
-const UsersToolbar = ({
+const ProductsToolbar = ({
   onSearchChange,
   setIsCreateModalOpen,
-}: UsersToolbarProps) => {
+}: ProductsToolbarProps) => {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
       <div className="relative w-full max-w-sm">
@@ -35,10 +35,10 @@ const UsersToolbar = ({
         onClick={() => setIsCreateModalOpen(true)}
         className="px-4 py-2 bg-green-600 rounded cursor-pointer hover:bg-green-500 text-white"
       >
-        + افزودن کاربر
+        + افزودن محصول
       </button>
     </div>
   );
 };
 
-export default UsersToolbar;
+export default ProductsToolbar;
