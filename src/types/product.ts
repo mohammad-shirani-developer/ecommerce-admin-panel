@@ -11,8 +11,9 @@ export interface Product {
   name: string;
   price: number;
   category: ProductCategory | string;
-  stock: number;
+  stock?: number;
   status: ProductStatus;
+  soldCount?: number;
 }
 
 export type CreateProductInput = Omit<Product, "id">;
