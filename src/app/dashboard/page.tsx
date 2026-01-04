@@ -1,11 +1,13 @@
 "use client";
-import { productsDB } from "@/data/products";
-import { users } from "@/data/users";
 import { getDashboardStats } from "@/utils/dashboardData";
+import { generateProducts } from "@/utils/generateProducts";
+import { generateUsers } from "@/utils/generateUsers";
 import StatsGrid from "./StatsGrid";
 
 const DashboardPage = () => {
-  const stats = getDashboardStats(users, productsDB);
+  const users = generateUsers(20);
+  const products = generateProducts(15);
+  const stats = getDashboardStats(users, products);
 
   return (
     <>
