@@ -1,23 +1,16 @@
-import { AiFillDollarCircle } from "react-icons/ai";
-import { FaUser } from "react-icons/fa";
+"use client";
+import { productsDB } from "@/data/products";
+import { users } from "@/data/users";
+import { getDashboardStats } from "@/utils/dashboardData";
 import StatsGrid from "./StatsGrid";
 
 const DashboardPage = () => {
-  const stats = [
-    { id: 1, title: "کل کاربران", value: 1500, icon: <FaUser /> },
-    { id: 2, title: "کاربران فعال", value: 300, icon: <FaUser /> },
-    {
-      id: 3,
-      title: "درآمد",
-      value: "۱۲٬۰۰۰ تومان",
-      icon: <AiFillDollarCircle />,
-    },
-  ];
+  const stats = getDashboardStats(users, productsDB);
 
   return (
     <>
       <h2 className="text-2xl font-bold mb-4">داشبورد</h2>
-      <StatsGrid items={stats} />
+      <StatsGrid stats={stats} />
     </>
   );
 };

@@ -1,26 +1,23 @@
-import StatsCard from "./StatsCard";
-
 interface StatItem {
-  id: number;
-  title: string;
-  value: string | number;
-  icon?: React.ReactNode;
+  label: string;
+  value: number;
 }
 
 interface StatsGridProps {
-  items: StatItem[];
+  stats: StatItem[];
 }
 
-const StatsGrid = ({ items }: StatsGridProps) => {
+const StatsGrid = ({ stats }: StatsGridProps) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {items.map((item) => (
-        <StatsCard
-          key={item.id}
-          title={item.title}
-          value={item.value}
-          icon={item.icon}
-        />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {stats.map((stat) => (
+        <div
+          key={stat.label}
+          className="bg-gray-700 p-4 rounded-lg shadow-sm text-white"
+        >
+          <p className="text-gray-300 text-sm">{stat.label}</p>
+          <p className="text-xl font-bold">{stat.value}</p>
+        </div>
       ))}
     </div>
   );
