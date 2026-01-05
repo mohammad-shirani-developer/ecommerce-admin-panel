@@ -1,15 +1,8 @@
 import { Product } from "@/types/product";
+import { ChartData } from "./charts.types";
 
-export interface ProductStatusStat {
-  name: string;
-  value: number;
-}
-
-export const calculateProductStatusStats = (
-  products: Product[]
-): ProductStatusStat[] => {
+export const adaptProductStatusToChart = (products: Product[]): ChartData[] => {
   const activeCount = products.filter((p) => p.status === "active").length;
-
   const inactiveCount = products.length - activeCount;
 
   return [
