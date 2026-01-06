@@ -2,12 +2,12 @@
 
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
+import StatsGrid from "@/components/dashboard/StatsGrid";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
 import { getDashboardStats } from "@/utils/dashboardData";
 import { generateProducts } from "@/utils/generateProducts";
 import { generateUsers } from "@/utils/generateUsers";
-import StatsGrid from "./StatsGrid";
 
 const DashboardPage = () => {
   const users = generateUsers(20);
