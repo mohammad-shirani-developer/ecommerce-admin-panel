@@ -1,33 +1,31 @@
 import { create } from "zustand";
 
-type UserRole = "admin" | "user" | "guest";
-
-interface AuthUser {
-  id: string;
+interface User {
+  id: number;
   name: string;
-  role: UserRole;
+  email: string;
 }
 
 interface AuthState {
+  user: User | null;
   isAuthenticated: boolean;
-  user: AuthUser | null;
-  Login: (email: string, password: string) => void;
-  Logout: () => void;
+  login: (user: User) => void;
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  isAuthenticated: false,
   user: null,
-  Login: (email: string, password: string) => {
-    if (!email || !password) return;
-    const fakeUser: AuthUser = {
-      id: "1",
-      name: "محمد شیرانی",
-      role: "user",
-    };
-    set({ isAuthenticated: true, user: fakeUser });
-  },
-  Logout: () => {
-    set({ isAuthenticated: false, user: null });
-  },
+  isAuthenticated: false,
+
+  login: (user) =>
+    set({
+      user,
+      isAuthenticated: true,
+    }),
+
+  logout: () =>
+    set({
+      user: null,
+      isAuthenticated: false,
+    }),
 }));
