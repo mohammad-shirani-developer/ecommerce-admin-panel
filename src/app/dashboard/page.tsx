@@ -3,42 +3,20 @@
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
 import StatsGrid from "@/components/dashboard/StatsGrid";
-import { Product } from "@/types/product";
-import { User } from "@/types/user";
-import { fetchDashboardData } from "@/utils/auth/api/dashboard.api";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
 import { getDashboardStats } from "@/utils/dashboardData";
-import { useEffect, useState } from "react";
 
 const DashboardPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { products, users, loading, error } = useDashboardData();
+
+  if (loading) return <div>در حال بارگذاری...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   const stats = getDashboardStats(users, products);
   const statusData = adaptProductStatusToChart(products);
   const salesData = adaptProductsToSalesChart(products);
-
-  useEffect(() => {
-    fetchDashboardData()
-      .then(({ products, users }) => {
-        setProducts(products);
-        setUsers(users);
-      })
-      .catch(() => {
-        setError("خطا در بارگذاری داده‌های داشبورد");
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return <div className="text-center">در حال بارگذاری...</div>;
-  }
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
 
   return (
     <>
