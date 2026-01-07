@@ -2,6 +2,7 @@
 
 import { useAuthStore } from "@/stores/auth.store";
 import { generateFakeJWT } from "@/utils/auth/fakeJwt";
+import { setAuthCookie } from "@/utils/auth/token";
 import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
@@ -22,6 +23,7 @@ const LoginPage = () => {
     });
 
     login(user, token);
+    setAuthCookie(token);
     router.replace("/dashboard");
   };
 
