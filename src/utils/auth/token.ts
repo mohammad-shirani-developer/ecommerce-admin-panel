@@ -14,3 +14,11 @@ export function removeToken(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
 }
+
+export function setAuthCookie(token: string) {
+  document.cookie = `auth_token=${token}; path=/`;
+}
+
+export function removeAuthCookie() {
+  document.cookie = "auth_token=; path=/; max-age=0";
+}

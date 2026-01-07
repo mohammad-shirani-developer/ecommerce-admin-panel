@@ -3,15 +3,17 @@
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
 import StatsGrid from "@/components/dashboard/StatsGrid";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
 import { getDashboardStats } from "@/utils/dashboardData";
-import { generateProducts } from "@/utils/generateProducts";
-import { generateUsers } from "@/utils/generateUsers";
 
 const DashboardPage = () => {
-  const users = generateUsers(20);
-  const products = generateProducts(15);
+  const { products, users, loading, error } = useDashboardData();
+
+  if (loading) return <div>در حال بارگذاری...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
   const stats = getDashboardStats(users, products);
   const statusData = adaptProductStatusToChart(products);
   const salesData = adaptProductsToSalesChart(products);

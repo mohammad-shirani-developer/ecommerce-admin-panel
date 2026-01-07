@@ -1,14 +1,10 @@
+import { useLogout } from "@/hooks/useLogout";
 import { useAuthStore } from "@/stores/auth.store";
-import { useRouter } from "next/navigation";
 
 const Navbar = () => {
-  const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
-  const router = useRouter();
-  const handleLogout = () => {
-    logout();
-    router.replace("/login");
-  };
+
+  const handleLogout = useLogout();
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800">
