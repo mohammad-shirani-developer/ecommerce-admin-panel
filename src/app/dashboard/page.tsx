@@ -3,18 +3,35 @@
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
 import StatsGrid from "@/components/dashboard/StatsGrid";
+import { Product } from "@/types/product";
+import { User } from "@/types/user";
+import { fetchDashboardData } from "@/utils/auth/api/dashboard.api";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
 import { getDashboardStats } from "@/utils/dashboardData";
-import { generateProducts } from "@/utils/generateProducts";
-import { generateUsers } from "@/utils/generateUsers";
+import { useEffect, useState } from "react";
 
 const DashboardPage = () => {
-  const users = generateUsers(20);
-  const products = generateProducts(15);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const stats = getDashboardStats(users, products);
   const statusData = adaptProductStatusToChart(products);
   const salesData = adaptProductsToSalesChart(products);
+
+  useEffect(() => {
+    fetchDashboardData()
+      .then(({ products, users }) => {
+        setProducts(products);
+        setUsers(users);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div className="text-center">در حال بارگذاری...</div>;
+  }
 
   return (
     <>
