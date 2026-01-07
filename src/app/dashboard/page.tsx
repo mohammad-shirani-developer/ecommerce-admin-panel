@@ -15,6 +15,7 @@ const DashboardPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const stats = getDashboardStats(users, products);
   const statusData = adaptProductStatusToChart(products);
@@ -26,11 +27,17 @@ const DashboardPage = () => {
         setProducts(products);
         setUsers(users);
       })
+      .catch(() => {
+        setError("خطا در بارگذاری داده‌های داشبورد");
+      })
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return <div className="text-center">در حال بارگذاری...</div>;
+  }
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
   }
 
   return (
