@@ -1,6 +1,7 @@
+import { ERROR_MESSAGES } from "@/constants/error";
 import { Product } from "@/types/product";
 import { User } from "@/types/user";
-import { fetchDashboardData } from "@/utils/auth/api/dashboard.api";
+import { fetchDashboardData } from "@/utils/api/dashboard.api";
 import { useEffect, useState } from "react";
 
 export const useDashboardData = () => {
@@ -16,7 +17,7 @@ export const useDashboardData = () => {
         setUsers(users);
       })
       .catch(() => {
-        setError("خطا در دریافت اطلاعات داشبورد");
+        setError(ERROR_MESSAGES.DASHBOARD_LOAD);
       })
       .finally(() => setLoading(false));
   }, []);
