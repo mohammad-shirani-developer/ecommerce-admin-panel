@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/stores/auth.store";
-import { generateFakeJWT } from "@/utils/fakeJwt";
+import { generateFakeJWT } from "@/utils/auth/fakeJwt";
 import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
