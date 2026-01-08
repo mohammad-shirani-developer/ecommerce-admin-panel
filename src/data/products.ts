@@ -1,6 +1,6 @@
 import { Product } from "@/types/product";
 
-export const productsDB: Product[] = [
+export let productsDB: Product[] = [
   {
     id: 1,
     name: "گوشی موبایل سامسونگ Galaxy A14",
@@ -86,3 +86,9 @@ export const productsDB: Product[] = [
     status: "inactive",
   },
 ];
+
+export const getProductsDB = () => productsDB;
+
+export const setProductsDB = (newProducts: Product[]) => {
+  productsDB = newProducts;
+};

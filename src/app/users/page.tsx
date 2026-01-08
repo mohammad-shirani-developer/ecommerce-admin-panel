@@ -6,7 +6,7 @@ import CreateUserForm from "@/components/users/CreateUserForm";
 import EditUserForm from "@/components/users/EditUserForm";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
-import { users as mockUsers } from "@/data/users";
+import { usersDB as mockUsers } from "@/data/users";
 import { CreateUserInput, User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
