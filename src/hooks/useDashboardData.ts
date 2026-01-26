@@ -16,8 +16,12 @@ export const useDashboardData = () => {
         setProducts(products);
         setUsers(users);
       })
-      .catch(() => {
-        setError(ERROR_MESSAGES.DASHBOARD_LOAD);
+      .catch((err) => {
+        if (err instanceof Error) {
+          setError(err.message); // Error message from the API
+        } else {
+          setError(ERROR_MESSAGES.DASHBOARD_LOAD); // Default error message
+        }
       })
       .finally(() => setLoading(false));
   }, []);
