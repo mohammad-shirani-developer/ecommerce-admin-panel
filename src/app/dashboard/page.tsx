@@ -3,6 +3,7 @@
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
 import StatsGrid from "@/components/dashboard/StatsGrid";
+import SkeletonLoader from "@/components/SkeletonLoader";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
@@ -11,7 +12,7 @@ import { getDashboardStats } from "@/utils/dashboardData";
 const DashboardPage = () => {
   const { products, users, loading, error } = useDashboardData();
 
-  if (loading) return <div>در حال بارگذاری...</div>;
+  if (loading) return <SkeletonLoader />;
   if (error) return <div className="text-red-500">{error}</div>;
 
   const stats = getDashboardStats(users, products);
