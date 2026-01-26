@@ -1,3 +1,4 @@
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { Figtree } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -66,7 +67,9 @@ export default function RootLayout({
       dir="rtl"
       className={` dark ${vazirmatn.variable} ${figtree.variable}`}
     >
-      <body className=" bg-gray-900 text-gray-100">{children}</body>
+      <body className=" bg-gray-900 text-gray-100">
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </body>
     </html>
   );
 }
