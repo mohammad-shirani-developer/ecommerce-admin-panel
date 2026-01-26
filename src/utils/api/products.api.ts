@@ -2,9 +2,16 @@ import { getProductsDB, setProductsDB } from "@/data/products";
 import { Product } from "@/types/product";
 
 export const productsApi = {
-  async fetchAll(): Promise<Product[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(getProductsDB()), 300);
+  async fetchAll() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const hasError = Math.random() > 0.8; // Simulating network failure (20% chance)
+        if (hasError) {
+          reject("خطای شبکه! لطفاً دوباره تلاش کنید.");
+        } else {
+          resolve(getProductsDB());
+        }
+      }, 1000); // Simulating 1 second delay
     });
   },
 

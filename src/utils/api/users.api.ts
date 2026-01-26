@@ -2,9 +2,16 @@ import { getUsersDB, setUsersDB } from "@/data/users";
 import { User } from "@/types/user";
 
 export const usersApi = {
-  async fetchAll(): Promise<User[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(getUsersDB()), 300);
+  async fetchAll() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const hasError = Math.random() > 0.8; // Simulating network failure (20% chance)
+        if (hasError) {
+          reject("خطای شبکه! لطفاً دوباره تلاش کنید.");
+        } else {
+          resolve(getUsersDB());
+        }
+      }, 1000); // Simulating 1 second delay
     });
   },
 
