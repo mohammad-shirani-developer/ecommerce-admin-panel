@@ -3,17 +3,44 @@
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
 import StatsGrid from "@/components/dashboard/StatsGrid";
+import EmptyState from "@/components/EmptyState";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
 import { getDashboardStats } from "@/utils/dashboardData";
+import { useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 const DashboardPage = () => {
   const { products, users, loading, error } = useDashboardData();
 
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
   if (loading) return <SkeletonLoader />;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error) {
+    return (
+      <>
+        <ToastContainer position="top-right" />
+        <div className="text-center text-red-500 mt-10">
+          مشکلی در دریافت اطلاعات پیش آمده
+        </div>
+      </>
+    );
+  }
+
+  if (products.length === 0 || users.length === 0) {
+    return (
+      <>
+        <ToastContainer position="top-right" />
+        <EmptyState message="داده‌ای برای نمایش وجود ندارد" />
+      </>
+    );
+  }
 
   const stats = getDashboardStats(users, products);
   const statusData = adaptProductStatusToChart(products);
@@ -21,6 +48,7 @@ const DashboardPage = () => {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="space-y-6">
         <h2 className="text-2xl font-bold mb-4">داشبورد</h2>
         <StatsGrid stats={stats} />
