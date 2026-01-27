@@ -2,6 +2,7 @@
 
 import ProductSalesBarChart from "@/components/charts/ProductSalesBarChart";
 import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
+import ToastContent from "@/components/common/ToastContent";
 import StatsGrid from "@/components/dashboard/StatsGrid";
 import EmptyState from "@/components/EmptyState";
 import SkeletonLoader from "@/components/SkeletonLoader";
@@ -10,36 +11,36 @@ import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter"
 import { adaptProductsToSalesChart } from "@/utils/charts/salesBar.adapter";
 import { getDashboardStats } from "@/utils/dashboardData";
 import { useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 const DashboardPage = () => {
   const { products, users, loading, error } = useDashboardData();
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      toast.error(
+        <ToastContent title="خطا" message="مشکلی در دریافت اطلاعات پیش آمده" />,
+        {
+          className: "bg-red-600 text-white",
+        },
+      );
     }
   }, [error]);
 
-  if (loading) return <SkeletonLoader />;
+  if (loading) {
+    return <SkeletonLoader />;
+  }
+
   if (error) {
     return (
-      <>
-        <ToastContainer position="top-right" />
-        <div className="text-center text-red-500 mt-10">
-          مشکلی در دریافت اطلاعات پیش آمده
-        </div>
-      </>
+      <div className="text-center text-red-500 mt-10">
+        خطا در دریافت اطلاعات داشبورد
+      </div>
     );
   }
 
   if (products.length === 0 || users.length === 0) {
-    return (
-      <>
-        <ToastContainer position="top-right" />
-        <EmptyState message="داده‌ای برای نمایش وجود ندارد" />
-      </>
-    );
+    return <EmptyState message="داده‌ای برای نمایش وجود ندارد" />;
   }
 
   const stats = getDashboardStats(users, products);
@@ -47,17 +48,16 @@ const DashboardPage = () => {
   const salesData = adaptProductsToSalesChart(products);
 
   return (
-    <>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold mb-4">داشبورد</h2>
-        <StatsGrid stats={stats} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ProductSalesBarChart data={salesData} />
-          <ProductStatusPieChart data={statusData} />
-        </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold mb-4">داشبورد</h2>
+
+      <StatsGrid stats={stats} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ProductSalesBarChart data={salesData} />
+        <ProductStatusPieChart data={statusData} />
       </div>
-    </>
+    </div>
   );
 };
 
