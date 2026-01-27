@@ -5,6 +5,7 @@ import ProductStatusPieChart from "@/components/charts/ProductStatusPieChart";
 import ToastContent from "@/components/common/ToastContent";
 import StatsGrid from "@/components/dashboard/StatsGrid";
 import EmptyState from "@/components/EmptyState";
+import AdminGuard from "@/components/guards/AdminGuard";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { adaptProductStatusToChart } from "@/utils/charts/productStatus.adapter";
@@ -52,6 +53,15 @@ const DashboardPage = () => {
       <h2 className="text-2xl font-bold mb-4">داشبورد</h2>
 
       <StatsGrid stats={stats} />
+
+      <AdminGuard>
+        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+          <h3 className="font-semibold mb-2">امکانات مدیر</h3>
+          <p className="text-sm text-gray-400">
+            این بخش فقط برای مدیر سیستم نمایش داده می‌شود
+          </p>
+        </div>
+      </AdminGuard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProductSalesBarChart data={salesData} />
