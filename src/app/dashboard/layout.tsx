@@ -12,7 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -21,13 +21,14 @@ export default function DashboardLayout({
   }, [isAuthenticated, router]);
 
   if (!isAuthenticated) {
-    return null; // یا Loading ساده
+    return null; // یا Skeleton ساده
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1">
+
+      <div className="flex flex-col flex-1">
         <Navbar />
         <main className="p-4">{children}</main>
       </div>

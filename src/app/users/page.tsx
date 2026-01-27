@@ -2,11 +2,12 @@
 import ConfirmModal from "@/components/common/ConfirmModal";
 import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
+import EmptyState from "@/components/EmptyState";
 import CreateUserForm from "@/components/users/CreateUserForm";
 import EditUserForm from "@/components/users/EditUserForm";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
-import { users as mockUsers } from "@/data/users";
+import { usersDB as mockUsers } from "@/data/users";
 import { CreateUserInput, User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
@@ -113,6 +114,7 @@ const Userpage = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">کاربران</h1>
+      {users.length === 0 && <EmptyState message="هیچ کاربری موجود نیست" />}
       <UsersToolbar
         onSearchChange={(v) => {
           setSearch(v);

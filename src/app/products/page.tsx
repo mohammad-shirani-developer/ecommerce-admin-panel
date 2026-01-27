@@ -2,6 +2,8 @@
 import ConfirmModal from "@/components/common/ConfirmModal";
 import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
+import EmptyState from "@/components/EmptyState";
+
 import CreateProductForm from "@/components/products/CreateProductForm";
 import EditProductForm from "@/components/products/EditProductForm";
 import ProductsToolbar from "@/components/products/ProductsToolbar";
@@ -119,6 +121,7 @@ const ProductsPage = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">محصولات</h1>
+      {products.length === 0 && <EmptyState message="هیچ محصولی یافت نشد." />}
       <ProductsToolbar
         onSearchChange={(v) => {
           setSearch(v);

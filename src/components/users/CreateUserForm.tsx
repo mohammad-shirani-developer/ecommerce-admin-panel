@@ -23,7 +23,7 @@ const CreateUserForm = ({ onCreate }: CreateUserFormProps) => {
     //   status,
     // };
 
-    onCreate({ name, email, status });
+    onCreate({ name, email, status, role: "user" });
 
     // reset form
     setName("");

@@ -1,7 +1,35 @@
+import { getUsersDB, setUsersDB } from "@/data/users";
 import { User } from "@/types/user";
-import { generateUsers } from "@/utils/generateUsers";
 
-export const fetchUsers = async (): Promise<User[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  return generateUsers(20);
+export const usersApi = {
+  async fetchAll() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const hasError = Math.random() > 0.8; // Simulating network failure (20% chance)
+        if (hasError) {
+          reject("خطای شبکه! لطفاً دوباره تلاش کنید.");
+        } else {
+          resolve(getUsersDB());
+        }
+      }, 1000); // Simulating 1 second delay
+    });
+  },
+
+  async update(userId: number, payload: Partial<User>): Promise<User> {
+    const users = getUsersDB();
+
+    const updatedUsers = users.map((u) =>
+      u.id === userId ? { ...u, ...payload } : u
+    );
+
+    setUsersDB(updatedUsers);
+
+    const updatedUser = updatedUsers.find((u) => u.id === userId)!;
+    return updatedUser;
+  },
+
+  async delete(userId: number): Promise<void> {
+    const users = getUsersDB().filter((u) => u.id !== userId);
+    setUsersDB(users);
+  },
 };

@@ -1,9 +1,15 @@
 import { DashboardApiResponse } from "@/types/api";
-import { fetchProducts } from "./products.api";
-import { fetchUsers } from "./users.api";
+import { productsApi } from "./products.api";
+import { usersApi } from "./users.api";
 
 export const fetchDashboardData = async (): Promise<DashboardApiResponse> => {
-  const [products, users] = await Promise.all([fetchProducts(), fetchUsers()]);
+  const [users, products] = await Promise.all([
+    usersApi.fetchAll(),
+    productsApi.fetchAll(),
+  ]);
 
-  return { products, users };
+  return {
+    users,
+    products,
+  };
 };
