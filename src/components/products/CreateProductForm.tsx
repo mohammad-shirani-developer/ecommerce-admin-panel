@@ -1,5 +1,3 @@
-"use client";
-
 import { CreateProductInput } from "@/types/product";
 import { useState } from "react";
 
@@ -15,18 +13,9 @@ const CreateProductForm = ({ onCreate }: CreateProductFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!name.trim() || !price) return;
-
-    // const newUser: CreateUserInput = {
-    //   name,
-    //   email,
-    //   status,
-    // };
-
     onCreate({ name, price, status, category });
-
-    // reset form
+    // Reset form after submission
     setName("");
     setPrice(0);
     setCategory("");

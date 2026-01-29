@@ -1,5 +1,3 @@
-"use client";
-
 import { Product } from "@/types/product";
 import { useEffect, useState } from "react";
 
@@ -14,7 +12,6 @@ const EditProductForm = ({ product, onSave }: EditProductFormProps) => {
   const [price, setPrice] = useState(0);
   const [status, setStatus] = useState<"active" | "inactive">("active");
 
-  // وقتی product تغییر می‌کند (باز شدن modal)
   useEffect(() => {
     if (product) {
       setName(product.name);
@@ -27,7 +24,6 @@ const EditProductForm = ({ product, onSave }: EditProductFormProps) => {
   if (!product) return null;
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     onSave({
       ...product,
       name,
@@ -45,7 +41,7 @@ const EditProductForm = ({ product, onSave }: EditProductFormProps) => {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded bg-gray-700 border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded bg-gray-700 border border-gray-600 px-3 py-2"
         />
       </div>
 
@@ -56,7 +52,7 @@ const EditProductForm = ({ product, onSave }: EditProductFormProps) => {
           type="number"
           value={price}
           onChange={(e) => setPrice(Number(e.target.value))}
-          className="w-full rounded bg-gray-700 border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded bg-gray-700 border border-gray-600 px-3 py-2"
         />
       </div>
 
@@ -66,7 +62,7 @@ const EditProductForm = ({ product, onSave }: EditProductFormProps) => {
         <input
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full rounded bg-gray-700 border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded bg-gray-700 border border-gray-600 px-3 py-2"
         />
       </div>
 
@@ -83,11 +79,10 @@ const EditProductForm = ({ product, onSave }: EditProductFormProps) => {
         </select>
       </div>
 
-      {/* دکمه‌ها */}
       <div className="flex justify-end gap-3 pt-4">
         <button
           type="submit"
-          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500"
+          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 cursor-pointer"
         >
           ذخیره
         </button>
