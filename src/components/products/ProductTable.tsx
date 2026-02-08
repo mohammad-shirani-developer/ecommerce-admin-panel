@@ -1,109 +1,66 @@
-"use client";
-
 import { Product } from "@/types/product";
+import { ProductSortKey } from "@/types/table";
 import { MdDelete, MdOutlineModeEdit } from "react-icons/md";
-import { toast } from "react-toastify";
-import UserStatusBadge from "./ProductStatusBadge";
+import Table from "../common/table";
+import ProductStatusBadge from "./ProductStatusBadge";
 
 interface ProductsTableProps {
   products: Product[];
-  onToggleStatus: (productId: number) => void;
+  sortBy: ProductSortKey;
+  sortDirection: "asc" | "desc";
+  onSort: (key: ProductSortKey) => void;
+  onToggleStatus: (id: number) => void;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
-  onSort: (key: keyof Product) => void;
-  sortBy: keyof Product;
-  sortDirection: "asc" | "desc";
 }
+
+const columns = [
+  { key: "id", label: "ID", sortable: true },
+  { key: "name", label: "نام", sortable: true },
+  { key: "price", label: "قیمت", sortable: true },
+  { key: "category", label: "دسته‌بندی", sortable: true },
+  { key: "status", label: "وضعیت", sortable: true },
+] as const;
 
 const ProductsTable = ({
   products,
+  sortBy,
+  sortDirection,
+  onSort,
   onToggleStatus,
   onEdit,
   onDelete,
-  onSort,
-  sortBy,
-  sortDirection,
 }: ProductsTableProps) => {
-  const handleDelete = (product: Product) => {
-    // Optimistic UI approach: immediately remove product from table and then delete it
-    onDelete(product);
-    toast.success("محصول با موفقیت حذف شد!");
-  };
-
-  const handleStatusToggle = (productId: number) => {
-    onToggleStatus(productId);
-    toast.success("وضعیت محصول با موفقیت تغییر کرد!");
-  };
-
   return (
-    <table className="w-full text-right table-auto border border-gray-700 text-sm">
-      <thead className="bg-gray-800 text-gray-200">
-        <tr className="bg-gray-800">
-          <th
-            onClick={() => onSort("id")}
-            className="cursor-pointer select-none"
-          >
-            ID {sortBy === "id" && (sortDirection === "asc" ? "▲" : "▼")}
-          </th>
-          <th
-            onClick={() => onSort("name")}
-            className="cursor-pointer select-none"
-          >
-            نام {sortBy === "name" && (sortDirection === "asc" ? "▲" : "▼")}
-          </th>
-          <th
-            onClick={() => onSort("price")}
-            className="cursor-pointer select-none"
-          >
-            قیمت {sortBy === "price" && (sortDirection === "asc" ? "▲" : "▼")}
-          </th>
-          <th
-            onClick={() => onSort("category")}
-            className="cursor-pointer select-none"
-          >
-            دسته‌بندی
-            {sortBy === "category" && (sortDirection === "asc" ? "▲" : "▼")}
-          </th>
-          <th
-            onClick={() => onSort("status")}
-            className="cursor-pointer select-none"
-          >
-            وضعیت {sortBy === "status" && (sortDirection === "asc" ? "▲" : "▼")}
-          </th>
-          <th className="py-2 px-4 border-b border-gray-700">عملیات</th>
+    <Table<Product, ProductSortKey>
+      data={products}
+      columns={columns}
+      sortBy={sortBy}
+      sortDirection={sortDirection}
+      onSort={onSort}
+      renderRow={(product) => (
+        <tr key={product.id} className="hover:bg-gray-700">
+          <td>{product.id}</td>
+          <td>{product.name}</td>
+          <td>{product.price}</td>
+          <td>{product.category}</td>
+          <td>
+            <ProductStatusBadge
+              status={product.status}
+              onClick={() => onToggleStatus(product.id)}
+            />
+          </td>
+          <td className="flex gap-2">
+            <button onClick={() => onEdit(product)}>
+              <MdOutlineModeEdit />
+            </button>
+            <button onClick={() => onDelete(product)}>
+              <MdDelete />
+            </button>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {products.map((product) => (
-          <tr key={product.id} className="hover:bg-gray-700 transition-colors">
-            <td className="py-2 px-4 border-b border-gray-700">{product.id}</td>
-            <td className="py-2 px-4 border-b border-gray-700">
-              {product.name}
-            </td>
-            <td className="py-2 px-4 border-b border-gray-700">
-              {product.price}
-            </td>
-            <td className="py-2 px-4 border-b border-gray-700">
-              {product.category}
-            </td>
-            <td className="py-2 px-4 border-b border-gray-700">
-              <UserStatusBadge
-                status={product.status}
-                onClick={() => handleStatusToggle(product.id)}
-              />
-            </td>
-            <td className="py-2 px-4 border-b border-gray-700">
-              <button className="p-1" onClick={() => onEdit(product)}>
-                <MdOutlineModeEdit className="text-gray-500 hover:text-gray-300 cursor-pointer text-2xl border-none" />
-              </button>
-              <button className="p-1" onClick={() => handleDelete(product)}>
-                <MdDelete className="text-gray-500 hover:text-gray-300 cursor-pointer text-2xl border-none" />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      )}
+    />
   );
 };
 

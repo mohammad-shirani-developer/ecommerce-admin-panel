@@ -1,8 +1,11 @@
 interface ProductsToolbarProps {
+  searchValue: string;
   onSearchChange: (value: string) => void;
   setIsCreateModalOpen: (isOpen: boolean) => void;
 }
+
 const ProductsToolbar = ({
+  searchValue,
   onSearchChange,
   setIsCreateModalOpen,
 }: ProductsToolbarProps) => {
@@ -11,7 +14,8 @@ const ProductsToolbar = ({
       <div className="relative w-full max-w-sm">
         <input
           type="text"
-          placeholder="جستجوی کاربر..."
+          value={searchValue}
+          placeholder="جستجوی محصول..."
           className="
             w-full
             rounded-md
@@ -31,9 +35,10 @@ const ProductsToolbar = ({
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
+
       <button
         onClick={() => setIsCreateModalOpen(true)}
-        className="px-4 py-2 bg-green-600 rounded cursor-pointer hover:bg-green-500 text-white"
+        className="px-4 py-2 bg-green-600 rounded hover:bg-green-500 text-white"
       >
         + افزودن محصول
       </button>
