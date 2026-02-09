@@ -1,7 +1,8 @@
 import { Product } from "@/types/product";
 import { ProductSortKey } from "@/types/table";
 import { MdDelete, MdOutlineModeEdit } from "react-icons/md";
-import Table from "../common/table";
+
+import Table from "../common/Table";
 import ProductStatusBadge from "./ProductStatusBadge";
 
 interface ProductsTableProps {

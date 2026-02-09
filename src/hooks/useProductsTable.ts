@@ -1,4 +1,3 @@
-import { productsDB as mockProducts } from "@/data/products";
 import { CreateProductInput, Product } from "@/types/product";
 import { ProductSortKey } from "@/types/table";
 import { filterItems } from "@/utils/filterItems";
@@ -8,13 +7,15 @@ import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 5;
 
-export const useProductsTable = () => {
+export const useProductsTable = (initialProducts: Product[]) => {
+  // ===== table state =====
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [search, setSearch] = useState("");
-  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [sortBy, setSortBy] = useState<ProductSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
+  // ===== modal state =====
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
@@ -34,8 +35,9 @@ export const useProductsTable = () => {
     );
   };
 
-  const handleSort = (key: ProductSortKey) => {
+  const sort = (key: ProductSortKey) => {
     setPage(1);
+
     if (sortBy === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -44,7 +46,7 @@ export const useProductsTable = () => {
     }
   };
 
-  const handleCreateProduct = (data: CreateProductInput) => {
+  const createProduct = (data: CreateProductInput) => {
     const nextId =
       products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
 
@@ -52,23 +54,23 @@ export const useProductsTable = () => {
     setIsCreateModalOpen(false);
   };
 
-  const handleEditProduct = (product: Product) => {
+  const startEdit = (product: Product) => {
     setEditProduct(product);
     setIsEditModalOpen(true);
   };
 
-  const handleSaveProduct = (updated: Product) => {
+  const saveEdit = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setEditProduct(null);
     setIsEditModalOpen(false);
   };
 
-  const handleDeleteProduct = (product: Product) => {
+  const startDelete = (product: Product) => {
     setDeleteProduct(product);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteProduct = () => {
+  const confirmDelete = () => {
     if (!deleteProduct) return;
 
     setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
@@ -84,6 +86,7 @@ export const useProductsTable = () => {
       "category",
       "status",
     ]);
+
     return sortItems(filtered, sortBy, sortDirection);
   }, [products, search, sortBy, sortDirection]);
 
@@ -92,6 +95,7 @@ export const useProductsTable = () => {
     [processedProducts, page],
   );
 
+  // ===== public API =====
   return {
     // data
     products: paginatedProducts,
@@ -118,11 +122,11 @@ export const useProductsTable = () => {
 
     // actions
     toggleStatus,
-    handleSort,
-    handleCreateProduct,
-    handleEditProduct,
-    handleSaveProduct,
-    handleDeleteProduct,
-    confirmDeleteProduct,
+    sort,
+    createProduct,
+    startEdit,
+    saveEdit,
+    startDelete,
+    confirmDelete,
   };
 };

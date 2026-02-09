@@ -10,98 +10,73 @@ import EditProductForm from "@/components/products/EditProductForm";
 import ProductsToolbar from "@/components/products/ProductsToolbar";
 import ProductsTable from "@/components/products/ProductTable";
 
+import { productsDB } from "@/data/products";
 import { useProductsTable } from "@/hooks/useProductsTable";
 
 const ProductsPage = () => {
-  const {
-    products,
-    total,
-    page,
-    pageSize,
-    search,
-    sortBy,
-    sortDirection,
-
-    editProduct,
-    deleteProduct,
-
-    isEditModalOpen,
-    isDeleteModalOpen,
-    isCreateModalOpen,
-
-    setSearch,
-    setPage,
-    setIsEditModalOpen,
-    setIsDeleteModalOpen,
-    setIsCreateModalOpen,
-
-    toggleStatus,
-    handleSort,
-    handleCreateProduct,
-    handleEditProduct,
-    handleSaveProduct,
-    handleDeleteProduct,
-    confirmDeleteProduct,
-  } = useProductsTable();
+  const table = useProductsTable(productsDB);
 
   return (
-    <div className="p-4">
-      <h1 className="mb-4 text-2xl font-bold">محصولات</h1>
+    <div className="p-4 space-y-4">
+      <h1 className="text-2xl font-bold">محصولات</h1>
 
-      {total === 0 && <EmptyState message="هیچ محصولی یافت نشد." />}
+      {table.total === 0 && <EmptyState message="هیچ محصولی یافت نشد" />}
 
+      {/* Toolbar */}
       <ProductsToolbar
-        searchValue={search}
+        searchValue={table.search}
         onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
+          table.setSearch(value);
+          table.setPage(1);
         }}
-        setIsCreateModalOpen={setIsCreateModalOpen}
+        setIsCreateModalOpen={table.setIsCreateModalOpen}
       />
 
+      {/* Table */}
       <ProductsTable
-        products={products}
-        onToggleStatus={toggleStatus}
-        onEdit={handleEditProduct}
-        onDelete={handleDeleteProduct}
-        onSort={handleSort}
-        sortBy={sortBy}
-        sortDirection={sortDirection}
+        products={table.products}
+        sortBy={table.sortBy}
+        sortDirection={table.sortDirection}
+        onSort={table.sort}
+        onToggleStatus={table.toggleStatus}
+        onEdit={table.startEdit}
+        onDelete={table.startDelete}
       />
 
+      {/* Pagination */}
       <Pagination
-        total={total}
-        pageSize={pageSize}
-        currentPage={page}
-        onPageChange={setPage}
+        total={table.total}
+        pageSize={table.pageSize}
+        currentPage={table.page}
+        onPageChange={table.setPage}
       />
 
       {/* Edit Modal */}
       <FormModal
-        isOpen={isEditModalOpen}
+        isOpen={table.isEditModalOpen}
         title="ویرایش محصول"
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => table.setIsEditModalOpen(false)}
       >
-        <EditProductForm product={editProduct} onSave={handleSaveProduct} />
+        <EditProductForm product={table.editProduct} onSave={table.saveEdit} />
       </FormModal>
 
       {/* Delete Modal */}
       <ConfirmModal
-        isOpen={isDeleteModalOpen}
+        isOpen={table.isDeleteModalOpen}
         title="حذف محصول"
-        message={`آیا از حذف ${deleteProduct?.name ?? ""} مطمئن هستید؟`}
+        message={`آیا از حذف «${table.deleteProduct?.name}» مطمئن هستید؟`}
         confirmText="حذف"
-        onCancel={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDeleteProduct}
+        onCancel={() => table.setIsDeleteModalOpen(false)}
+        onConfirm={table.confirmDelete}
       />
 
       {/* Create Modal */}
       <FormModal
-        isOpen={isCreateModalOpen}
+        isOpen={table.isCreateModalOpen}
         title="افزودن محصول"
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => table.setIsCreateModalOpen(false)}
       >
-        <CreateProductForm onCreate={handleCreateProduct} />
+        <CreateProductForm onCreate={table.createProduct} />
       </FormModal>
     </div>
   );
