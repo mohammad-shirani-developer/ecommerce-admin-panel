@@ -1,3 +1,6 @@
+"use client";
+
+import { productsDB as mockProducts } from "@/data/products";
 import { CreateProductInput, Product } from "@/types/product";
 import { ProductSortKey } from "@/types/table";
 import { filterItems } from "@/utils/filterItems";
@@ -7,15 +10,16 @@ import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 5;
 
-export const useProductsTable = (initialProducts: Product[]) => {
-  // ===== table state =====
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+export const useProductsTable = () => {
+  // ======================
+  // state
+  // ======================
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<ProductSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
-  // ===== modal state =====
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
@@ -23,8 +27,9 @@ export const useProductsTable = (initialProducts: Product[]) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // ===== actions =====
-
+  // ======================
+  // actions
+  // ======================
   const toggleStatus = (productId: number) => {
     setProducts((prev) =>
       prev.map((p) =>
@@ -35,9 +40,8 @@ export const useProductsTable = (initialProducts: Product[]) => {
     );
   };
 
-  const sort = (key: ProductSortKey) => {
+  const handleSort = (key: ProductSortKey) => {
     setPage(1);
-
     if (sortBy === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -46,7 +50,7 @@ export const useProductsTable = (initialProducts: Product[]) => {
     }
   };
 
-  const createProduct = (data: CreateProductInput) => {
+  const handleCreateProduct = (data: CreateProductInput) => {
     const nextId =
       products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
 
@@ -54,23 +58,23 @@ export const useProductsTable = (initialProducts: Product[]) => {
     setIsCreateModalOpen(false);
   };
 
-  const startEdit = (product: Product) => {
+  const handleEditProduct = (product: Product) => {
     setEditProduct(product);
     setIsEditModalOpen(true);
   };
 
-  const saveEdit = (updated: Product) => {
+  const handleSaveProduct = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setEditProduct(null);
     setIsEditModalOpen(false);
   };
 
-  const startDelete = (product: Product) => {
+  const handleDeleteProduct = (product: Product) => {
     setDeleteProduct(product);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDeleteProduct = () => {
     if (!deleteProduct) return;
 
     setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
@@ -78,15 +82,15 @@ export const useProductsTable = (initialProducts: Product[]) => {
     setIsDeleteModalOpen(false);
   };
 
-  // ===== derived data =====
-
+  // ======================
+  // derived data
+  // ======================
   const processedProducts = useMemo(() => {
     const filtered = filterItems(products, search, [
       "name",
       "category",
       "status",
     ]);
-
     return sortItems(filtered, sortBy, sortDirection);
   }, [products, search, sortBy, sortDirection]);
 
@@ -95,7 +99,9 @@ export const useProductsTable = (initialProducts: Product[]) => {
     [processedProducts, page],
   );
 
-  // ===== public API =====
+  // ======================
+  // return API
+  // ======================
   return {
     // data
     products: paginatedProducts,
@@ -122,11 +128,11 @@ export const useProductsTable = (initialProducts: Product[]) => {
 
     // actions
     toggleStatus,
-    sort,
-    createProduct,
-    startEdit,
-    saveEdit,
-    startDelete,
-    confirmDelete,
+    handleSort,
+    handleCreateProduct,
+    handleEditProduct,
+    handleSaveProduct,
+    handleDeleteProduct,
+    confirmDeleteProduct,
   };
 };

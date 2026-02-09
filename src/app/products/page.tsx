@@ -10,19 +10,17 @@ import EditProductForm from "@/components/products/EditProductForm";
 import ProductsToolbar from "@/components/products/ProductsToolbar";
 import ProductsTable from "@/components/products/ProductTable";
 
-import { productsDB } from "@/data/products";
 import { useProductsTable } from "@/hooks/useProductsTable";
 
 const ProductsPage = () => {
-  const table = useProductsTable(productsDB);
+  const table = useProductsTable();
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">محصولات</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">محصولات</h1>
 
-      {table.total === 0 && <EmptyState message="هیچ محصولی یافت نشد" />}
+      {table.total === 0 && <EmptyState message="هیچ محصولی یافت نشد." />}
 
-      {/* Toolbar */}
       <ProductsToolbar
         searchValue={table.search}
         onSearchChange={(value) => {
@@ -32,18 +30,16 @@ const ProductsPage = () => {
         setIsCreateModalOpen={table.setIsCreateModalOpen}
       />
 
-      {/* Table */}
       <ProductsTable
         products={table.products}
+        onToggleStatus={table.toggleStatus}
+        onEdit={table.handleEditProduct}
+        onDelete={table.handleDeleteProduct}
+        onSort={table.handleSort}
         sortBy={table.sortBy}
         sortDirection={table.sortDirection}
-        onSort={table.sort}
-        onToggleStatus={table.toggleStatus}
-        onEdit={table.startEdit}
-        onDelete={table.startDelete}
       />
 
-      {/* Pagination */}
       <Pagination
         total={table.total}
         pageSize={table.pageSize}
@@ -57,17 +53,20 @@ const ProductsPage = () => {
         title="ویرایش محصول"
         onClose={() => table.setIsEditModalOpen(false)}
       >
-        <EditProductForm product={table.editProduct} onSave={table.saveEdit} />
+        <EditProductForm
+          product={table.editProduct}
+          onSave={table.handleSaveProduct}
+        />
       </FormModal>
 
       {/* Delete Modal */}
       <ConfirmModal
         isOpen={table.isDeleteModalOpen}
         title="حذف محصول"
-        message={`آیا از حذف «${table.deleteProduct?.name}» مطمئن هستید؟`}
+        message={`آیا از حذف ${table.deleteProduct?.name} مطمئن هستید؟`}
         confirmText="حذف"
         onCancel={() => table.setIsDeleteModalOpen(false)}
-        onConfirm={table.confirmDelete}
+        onConfirm={table.confirmDeleteProduct}
       />
 
       {/* Create Modal */}
@@ -76,7 +75,7 @@ const ProductsPage = () => {
         title="افزودن محصول"
         onClose={() => table.setIsCreateModalOpen(false)}
       >
-        <CreateProductForm onCreate={table.createProduct} />
+        <CreateProductForm onCreate={table.handleCreateProduct} />
       </FormModal>
     </div>
   );
