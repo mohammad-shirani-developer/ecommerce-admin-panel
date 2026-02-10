@@ -1,25 +1,26 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { toast } from "react-toastify";
+
 import { productsDB as mockProducts } from "@/data/products";
 import { CreateProductInput, Product } from "@/types/product";
 import { ProductSortKey } from "@/types/table";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
-import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 5;
 
 export const useProductsTable = () => {
-  // ======================
-  // state
-  // ======================
+  // ===== table state =====
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<ProductSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
+  // ===== modal state =====
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
@@ -27,21 +28,26 @@ export const useProductsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // ======================
-  // actions
-  // ======================
+  // ===== actions =====
+
   const toggleStatus = (productId: number) => {
     setProducts((prev) =>
       prev.map((p) =>
         p.id === productId
-          ? { ...p, status: p.status === "active" ? "inactive" : "active" }
+          ? {
+              ...p,
+              status: p.status === "active" ? "inactive" : "active",
+            }
           : p,
       ),
     );
+
+    toast.info("وضعیت محصول تغییر کرد");
   };
 
   const handleSort = (key: ProductSortKey) => {
     setPage(1);
+
     if (sortBy === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -56,6 +62,8 @@ export const useProductsTable = () => {
 
     setProducts((prev) => [{ id: nextId, ...data }, ...prev]);
     setIsCreateModalOpen(false);
+
+    toast.success("محصول با موفقیت ایجاد شد");
   };
 
   const handleEditProduct = (product: Product) => {
@@ -65,8 +73,11 @@ export const useProductsTable = () => {
 
   const handleSaveProduct = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+
     setEditProduct(null);
     setIsEditModalOpen(false);
+
+    toast.success("محصول با موفقیت ویرایش شد");
   };
 
   const handleDeleteProduct = (product: Product) => {
@@ -78,19 +89,22 @@ export const useProductsTable = () => {
     if (!deleteProduct) return;
 
     setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
+
     setDeleteProduct(null);
     setIsDeleteModalOpen(false);
+
+    toast.warn("محصول حذف شد");
   };
 
-  // ======================
-  // derived data
-  // ======================
+  // ===== derived data =====
+
   const processedProducts = useMemo(() => {
     const filtered = filterItems(products, search, [
       "name",
       "category",
       "status",
     ]);
+
     return sortItems(filtered, sortBy, sortDirection);
   }, [products, search, sortBy, sortDirection]);
 
@@ -99,9 +113,7 @@ export const useProductsTable = () => {
     [processedProducts, page],
   );
 
-  // ======================
-  // return API
-  // ======================
+  // ===== public api =====
   return {
     // data
     products: paginatedProducts,
