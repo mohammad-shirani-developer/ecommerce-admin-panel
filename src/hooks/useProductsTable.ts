@@ -1,4 +1,4 @@
-import { productsService } from "@/services/productservice";
+import { productsDB as mockProducts } from "@/data/products";
 import { CreateProductInput, Product } from "@/types/product";
 import { ProductSortKey } from "@/types/table";
 import { filterItems } from "@/utils/filterItems";
@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState } from "react";
 const PAGE_SIZE = 5;
 
 export const useProductsTable = () => {
-  // ===== state =====
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,13 +25,13 @@ export const useProductsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // ===== fetch products =====
+  // 🔹 simulate API call
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const data = await productsService.getAll();
-        setProducts(data);
+        await new Promise((res) => setTimeout(res, 800));
+        setProducts(mockProducts);
       } catch {
         setError("خطا در دریافت محصولات");
       } finally {
@@ -44,10 +43,11 @@ export const useProductsTable = () => {
   }, []);
 
   // ===== actions =====
-  const toggleStatus = async (productId: number) => {
+
+  const toggleStatus = (id: number) => {
     setProducts((prev) =>
       prev.map((p) =>
-        p.id === productId
+        p.id === id
           ? { ...p, status: p.status === "active" ? "inactive" : "active" }
           : p,
       ),
@@ -57,16 +57,18 @@ export const useProductsTable = () => {
   const handleSort = (key: ProductSortKey) => {
     setPage(1);
     if (sortBy === key) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+      setSortDirection((p) => (p === "asc" ? "desc" : "asc"));
     } else {
       setSortBy(key);
       setSortDirection("asc");
     }
   };
 
-  const handleCreateProduct = async (data: CreateProductInput) => {
-    const created = await productsService.create(data);
-    setProducts((prev) => [created, ...prev]);
+  const handleCreateProduct = (data: CreateProductInput) => {
+    const nextId =
+      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+
+    setProducts((prev) => [{ id: nextId, ...data }, ...prev]);
     setIsCreateModalOpen(false);
   };
 
@@ -75,11 +77,10 @@ export const useProductsTable = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveProduct = async (updated: Product) => {
-    const saved = await productsService.update(updated);
-    setProducts((prev) => prev.map((p) => (p.id === saved.id ? saved : p)));
-    setEditProduct(null);
+  const handleSaveProduct = (updated: Product) => {
+    setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setIsEditModalOpen(false);
+    setEditProduct(null);
   };
 
   const handleDeleteProduct = (product: Product) => {
@@ -87,15 +88,15 @@ export const useProductsTable = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteProduct = async () => {
+  const confirmDelete = () => {
     if (!deleteProduct) return;
-    await productsService.remove(deleteProduct.id);
     setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-    setDeleteProduct(null);
     setIsDeleteModalOpen(false);
+    setDeleteProduct(null);
   };
 
-  // ===== derived data =====
+  // ===== derived =====
+
   const processedProducts = useMemo(() => {
     const filtered = filterItems(products, search, [
       "name",
@@ -116,11 +117,11 @@ export const useProductsTable = () => {
     total: processedProducts.length,
     page,
     pageSize: PAGE_SIZE,
-    loading,
-    error,
     search,
     sortBy,
     sortDirection,
+    loading,
+    error,
 
     // modal state
     editProduct,
@@ -143,6 +144,6 @@ export const useProductsTable = () => {
     handleEditProduct,
     handleSaveProduct,
     handleDeleteProduct,
-    confirmDeleteProduct,
+    confirmDelete,
   };
 };
