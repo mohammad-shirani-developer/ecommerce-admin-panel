@@ -1,167 +1,99 @@
 "use client";
+
 import ConfirmModal from "@/components/common/ConfirmModal";
 import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
 import EmptyState from "@/components/EmptyState";
-import CreateUserForm from "@/components/users/CreateUserForm";
+
 import EditUserForm from "@/components/users/EditUserForm";
 import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
-import { usersDB as mockUsers } from "@/data/users";
-import { CreateUserInput, User } from "@/types/user";
-import { filterItems } from "@/utils/filterItems";
-import { paginate } from "@/utils/paginate";
-import { sortItems } from "@/utils/sortItems";
-import { useMemo, useState } from "react";
 
-const PAGE_SIZE = 5;
+import { useUsersTable } from "@/hooks/useUsersTable";
 
-const Userpage = () => {
-  const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [sortBy, setSortBy] = useState<keyof User>("id");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [page, setPage] = useState(1);
-  const [editUser, setEditUser] = useState<User | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+const UsersPage = () => {
+  const {
+    // data
+    users,
+    total,
+    page,
+    pageSize,
+    search,
+    sortBy,
+    sortDirection,
 
-  const handleStatusClick = (userId: number) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId
-          ? {
-              ...user,
-              status: user.status === "active" ? "inactive" : "active",
-            }
-          : user
-      )
-    );
-  };
+    // modal state
+    editUser,
+    deleteUser,
+    isEditModalOpen,
+    isDeleteModalOpen,
 
-  const processedUsers = useMemo(() => {
-    const filtered = filterItems(users, search, ["name", "email"]);
-    const sorted = sortItems(filtered, sortBy, sortDirection);
-    return sorted;
-  }, [users, search, sortBy, sortDirection]);
+    // setters
+    setSearch,
+    setPage,
+    setIsEditModalOpen,
+    setIsDeleteModalOpen,
 
-  const paginatedUsers = useMemo(
-    () => paginate(processedUsers, page, PAGE_SIZE),
-    [processedUsers, page]
-  );
-
-  const handleEditUser = (user: User) => {
-    setEditUser(user);
-    setIsModalOpen(true);
-  };
-  const handleDeleteUser = (user: User) => {
-    setDeleteUser(user);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveUser = (updatedUser: User) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
-    );
-    setEditUser(null);
-    setIsModalOpen(false);
-  };
-  const handleDeletedUser = (updatedUser: User) => {
-    setUsers((prevUsers) =>
-      prevUsers.filter((user) => user.id !== updatedUser.id)
-    );
-    setDeleteUser(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const handleCloseModal = () => {
-    setEditUser(null);
-    setIsModalOpen(false);
-  };
-  const handleCloseDeleteModal = () => {
-    setDeleteUser(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const handleSort = (key: keyof User) => {
-    setPage(1);
-
-    if (sortBy === key) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDirection("asc");
-    }
-  };
-
-  const handleCreateUser = (data: CreateUserInput) => {
-    const nextId =
-      users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
-
-    setUsers((prev) => [
-      {
-        id: nextId,
-        ...data,
-      },
-      ...prev,
-    ]);
-
-    setIsCreateModalOpen(false);
-  };
+    // actions
+    handleSort,
+    toggleStatus,
+    handleEditUser,
+    handleSaveUser,
+    handleDeleteUser,
+    confirmDeleteUser,
+  } = useUsersTable();
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">کاربران</h1>
-      {users.length === 0 && <EmptyState message="هیچ کاربری موجود نیست" />}
+
       <UsersToolbar
-        onSearchChange={(v) => {
-          setSearch(v);
+        searchValue={search}
+        onSearchChange={(value) => {
+          setSearch(value);
           setPage(1);
         }}
-        setIsCreateModalOpen={setIsCreateModalOpen}
       />
+
+      {users.length === 0 && <EmptyState message="هیچ کاربری یافت نشد." />}
+
       <UsersTable
-        users={paginatedUsers}
-        onToggleStatus={handleStatusClick}
-        onEdit={handleEditUser}
-        onDelete={handleDeleteUser}
-        onSort={handleSort}
+        users={users}
         sortBy={sortBy}
         sortDirection={sortDirection}
+        onSort={handleSort}
+        onToggleStatus={toggleStatus}
+        onEdit={handleEditUser}
+        onDelete={handleDeleteUser}
       />
+
       <Pagination
-        total={processedUsers.length}
-        pageSize={PAGE_SIZE}
+        total={total}
+        pageSize={pageSize}
         currentPage={page}
         onPageChange={setPage}
       />
+
+      {/* Edit Modal */}
       <FormModal
-        isOpen={isModalOpen}
+        isOpen={isEditModalOpen}
         title="ویرایش کاربر"
-        onClose={handleCloseModal}
+        onClose={() => setIsEditModalOpen(false)}
       >
         <EditUserForm user={editUser} onSave={handleSaveUser} />
       </FormModal>
 
+      {/* Delete Modal */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="حذف کاربر"
         message={`آیا از حذف ${deleteUser?.name} مطمئن هستید؟`}
         confirmText="حذف"
-        onCancel={handleCloseDeleteModal}
-        onConfirm={() => handleDeletedUser(deleteUser!)}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDeleteUser}
       />
-      <FormModal
-        isOpen={isCreateModalOpen}
-        title="افزودن کاربر"
-        onClose={() => setIsCreateModalOpen(false)}
-      >
-        <CreateUserForm onCreate={handleCreateUser} />
-      </FormModal>
     </div>
   );
 };
 
-export default Userpage;
+export default UsersPage;

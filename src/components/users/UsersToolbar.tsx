@@ -1,16 +1,16 @@
 interface UsersToolbarProps {
+  searchValue: string;
   onSearchChange: (value: string) => void;
-  setIsCreateModalOpen: (isOpen: boolean) => void;
 }
-const UsersToolbar = ({
-  onSearchChange,
-  setIsCreateModalOpen,
-}: UsersToolbarProps) => {
+
+const UsersToolbar = ({ searchValue, onSearchChange }: UsersToolbarProps) => {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
       <div className="relative w-full max-w-sm">
         <input
           type="text"
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
           placeholder="جستجوی کاربر..."
           className="
             w-full
@@ -28,15 +28,8 @@ const UsersToolbar = ({
             focus:ring-1
             focus:ring-blue-500
           "
-          onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
-      <button
-        onClick={() => setIsCreateModalOpen(true)}
-        className="px-4 py-2 bg-green-600 rounded cursor-pointer hover:bg-green-500 text-white"
-      >
-        + افزودن کاربر
-      </button>
     </div>
   );
 };
