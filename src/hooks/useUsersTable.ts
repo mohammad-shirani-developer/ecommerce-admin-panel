@@ -1,3 +1,5 @@
+"use client";
+
 import { usersDB as mockUsers } from "@/data/users";
 import { UserSortKey } from "@/types/table";
 import { User } from "@/types/user";
@@ -9,21 +11,24 @@ import { useMemo, useState } from "react";
 const PAGE_SIZE = 5;
 
 export const useUsersTable = () => {
-  // ===== data =====
+  // ===== state =====
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<UserSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
-  // ===== modal state =====
+  const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // ===== actions =====
 
   const handleSort = (key: UserSortKey) => {
     setPage(1);
+
     if (sortBy === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -36,20 +41,26 @@ export const useUsersTable = () => {
     setUsers((prev) =>
       prev.map((u) =>
         u.id === userId
-          ? { ...u, status: u.status === "active" ? "inactive" : "active" }
+          ? {
+              ...u,
+              status: u.status === "active" ? "inactive" : "active",
+            }
           : u,
       ),
     );
   };
 
-  const changeRole = (userId: number) => {
+  const handleEditUser = (user: User) => {
+    setEditUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveUser = (updatedUser: User) => {
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId
-          ? { ...u, role: u.role === "admin" ? "user" : "admin" }
-          : u,
-      ),
+      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
     );
+    setEditUser(null);
+    setIsEditModalOpen(false);
   };
 
   const handleDeleteUser = (user: User) => {
@@ -74,6 +85,7 @@ export const useUsersTable = () => {
       "role",
       "status",
     ]);
+
     return sortItems(filtered, sortBy, sortDirection);
   }, [users, search, sortBy, sortDirection]);
 
@@ -82,6 +94,7 @@ export const useUsersTable = () => {
     [processedUsers, page],
   );
 
+  // ===== exposed API =====
   return {
     // data
     users: paginatedUsers,
@@ -93,18 +106,22 @@ export const useUsersTable = () => {
     sortDirection,
 
     // modal state
+    editUser,
     deleteUser,
+    isEditModalOpen,
     isDeleteModalOpen,
 
     // setters
     setSearch,
     setPage,
+    setIsEditModalOpen,
     setIsDeleteModalOpen,
 
     // actions
     handleSort,
     toggleStatus,
-    changeRole,
+    handleEditUser,
+    handleSaveUser,
     handleDeleteUser,
     confirmDeleteUser,
   };
