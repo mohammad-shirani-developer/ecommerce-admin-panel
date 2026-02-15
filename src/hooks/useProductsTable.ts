@@ -4,16 +4,14 @@ import { ProductSortKey } from "@/types/table";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 5;
 
 export const useProductsTable = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  // ===== state =====
   const [search, setSearch] = useState("");
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [sortBy, setSortBy] = useState<ProductSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
@@ -25,29 +23,11 @@ export const useProductsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // 🔹 simulate API call
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        await new Promise((res) => setTimeout(res, 800));
-        setProducts(mockProducts);
-      } catch {
-        setError("خطا در دریافت محصولات");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
   // ===== actions =====
-
-  const toggleStatus = (id: number) => {
+  const toggleStatus = (productId: number) => {
     setProducts((prev) =>
       prev.map((p) =>
-        p.id === id
+        p.id === productId
           ? { ...p, status: p.status === "active" ? "inactive" : "active" }
           : p,
       ),
@@ -57,7 +37,7 @@ export const useProductsTable = () => {
   const handleSort = (key: ProductSortKey) => {
     setPage(1);
     if (sortBy === key) {
-      setSortDirection((p) => (p === "asc" ? "desc" : "asc"));
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortBy(key);
       setSortDirection("asc");
@@ -79,8 +59,8 @@ export const useProductsTable = () => {
 
   const handleSaveProduct = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-    setIsEditModalOpen(false);
     setEditProduct(null);
+    setIsEditModalOpen(false);
   };
 
   const handleDeleteProduct = (product: Product) => {
@@ -88,15 +68,15 @@ export const useProductsTable = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDeleteProduct = () => {
     if (!deleteProduct) return;
+
     setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-    setIsDeleteModalOpen(false);
     setDeleteProduct(null);
+    setIsDeleteModalOpen(false);
   };
 
-  // ===== derived =====
-
+  // ===== derived data =====
   const processedProducts = useMemo(() => {
     const filtered = filterItems(products, search, [
       "name",
@@ -111,6 +91,7 @@ export const useProductsTable = () => {
     [processedProducts, page],
   );
 
+  // ===== return =====
   return {
     // data
     products: paginatedProducts,
@@ -120,8 +101,6 @@ export const useProductsTable = () => {
     search,
     sortBy,
     sortDirection,
-    loading,
-    error,
 
     // modal state
     editProduct,
@@ -144,6 +123,6 @@ export const useProductsTable = () => {
     handleEditProduct,
     handleSaveProduct,
     handleDeleteProduct,
-    confirmDelete,
+    confirmDeleteProduct,
   };
 };

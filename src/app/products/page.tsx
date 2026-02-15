@@ -14,7 +14,6 @@ import { useProductsTable } from "@/hooks/useProductsTable";
 
 const ProductsPage = () => {
   const {
-    // data
     products,
     total,
     page,
@@ -22,46 +21,32 @@ const ProductsPage = () => {
     search,
     sortBy,
     sortDirection,
-    loading,
-    error,
 
-    // modal state
     editProduct,
     deleteProduct,
     isEditModalOpen,
     isDeleteModalOpen,
     isCreateModalOpen,
 
-    // setters
     setSearch,
     setPage,
     setIsCreateModalOpen,
     setIsEditModalOpen,
     setIsDeleteModalOpen,
 
-    // actions
     toggleStatus,
     handleSort,
     handleCreateProduct,
     handleEditProduct,
     handleSaveProduct,
     handleDeleteProduct,
-    confirmDelete,
+    confirmDeleteProduct,
   } = useProductsTable();
 
-  if (loading) {
-    return <div className="p-4">در حال بارگذاری...</div>;
-  }
-
-  if (error) {
-    return <EmptyState message={error} />;
-  }
-
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">محصولات</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">محصولات</h1>
 
-      {/* Toolbar */}
       <ProductsToolbar
         searchValue={search}
         onSearchChange={(value) => {
@@ -71,30 +56,24 @@ const ProductsPage = () => {
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {/* Empty */}
       {products.length === 0 && <EmptyState message="هیچ محصولی یافت نشد." />}
 
-      {/* Table */}
-      {products.length > 0 && (
-        <>
-          <ProductsTable
-            products={products}
-            onToggleStatus={toggleStatus}
-            onEdit={handleEditProduct}
-            onDelete={handleDeleteProduct}
-            onSort={handleSort}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-          />
+      <ProductsTable
+        products={products}
+        onToggleStatus={toggleStatus}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
+        onSort={handleSort}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+      />
 
-          <Pagination
-            total={total}
-            pageSize={pageSize}
-            currentPage={page}
-            onPageChange={setPage}
-          />
-        </>
-      )}
+      <Pagination
+        total={total}
+        pageSize={pageSize}
+        currentPage={page}
+        onPageChange={setPage}
+      />
 
       {/* Edit Modal */}
       <FormModal
@@ -102,9 +81,7 @@ const ProductsPage = () => {
         title="ویرایش محصول"
         onClose={() => setIsEditModalOpen(false)}
       >
-        {editProduct && (
-          <EditProductForm product={editProduct} onSave={handleSaveProduct} />
-        )}
+        <EditProductForm product={editProduct} onSave={handleSaveProduct} />
       </FormModal>
 
       {/* Delete Modal */}
@@ -114,7 +91,7 @@ const ProductsPage = () => {
         message={`آیا از حذف ${deleteProduct?.name} مطمئن هستید؟`}
         confirmText="حذف"
         onCancel={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDelete}
+        onConfirm={confirmDeleteProduct}
       />
 
       {/* Create Modal */}
