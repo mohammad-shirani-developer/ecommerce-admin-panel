@@ -1,6 +1,4 @@
-"use client";
-
-import { usersDB as mockUsers } from "@/data/users";
+import { usersDB } from "@/data/users";
 import { UserSortKey } from "@/types/table";
 import { User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
@@ -11,72 +9,11 @@ import { useMemo, useState } from "react";
 const PAGE_SIZE = 5;
 
 export const useUsersTable = () => {
-  // ===== state =====
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users] = useState<User[]>(usersDB);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<UserSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
-
-  const [editUser, setEditUser] = useState<User | null>(null);
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  // ===== actions =====
-
-  const handleSort = (key: UserSortKey) => {
-    setPage(1);
-
-    if (sortBy === key) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDirection("asc");
-    }
-  };
-
-  const toggleStatus = (userId: number) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId
-          ? {
-              ...u,
-              status: u.status === "active" ? "inactive" : "active",
-            }
-          : u,
-      ),
-    );
-  };
-
-  const handleEditUser = (user: User) => {
-    setEditUser(user);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveUser = (updatedUser: User) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
-    );
-    setEditUser(null);
-    setIsEditModalOpen(false);
-  };
-
-  const handleDeleteUser = (user: User) => {
-    setDeleteUser(user);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDeleteUser = () => {
-    if (!deleteUser) return;
-
-    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
-    setDeleteUser(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  // ===== derived data =====
 
   const processedUsers = useMemo(() => {
     const filtered = filterItems(users, search, [
@@ -94,9 +31,17 @@ export const useUsersTable = () => {
     [processedUsers, page],
   );
 
-  // ===== exposed API =====
+  const handleSort = (key: UserSortKey) => {
+    setPage(1);
+    if (sortBy === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDirection("asc");
+    }
+  };
+
   return {
-    // data
     users: paginatedUsers,
     total: processedUsers.length,
     page,
@@ -105,24 +50,8 @@ export const useUsersTable = () => {
     sortBy,
     sortDirection,
 
-    // modal state
-    editUser,
-    deleteUser,
-    isEditModalOpen,
-    isDeleteModalOpen,
-
-    // setters
     setSearch,
     setPage,
-    setIsEditModalOpen,
-    setIsDeleteModalOpen,
-
-    // actions
     handleSort,
-    toggleStatus,
-    handleEditUser,
-    handleSaveUser,
-    handleDeleteUser,
-    confirmDeleteUser,
   };
 };
