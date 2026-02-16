@@ -9,27 +9,18 @@ import { useMemo, useState } from "react";
 const PAGE_SIZE = 5;
 
 export const useUsersTable = () => {
-  const [users] = useState<User[]>(usersDB);
+  const [users, setUsers] = useState<User[]>(usersDB);
+
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<UserSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
-  const processedUsers = useMemo(() => {
-    const filtered = filterItems(users, search, [
-      "name",
-      "email",
-      "role",
-      "status",
-    ]);
+  // modal state
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    return sortItems(filtered, sortBy, sortDirection);
-  }, [users, search, sortBy, sortDirection]);
-
-  const paginatedUsers = useMemo(
-    () => paginate(processedUsers, page, PAGE_SIZE),
-    [processedUsers, page],
-  );
+  // ===== actions =====
 
   const handleSort = (key: UserSortKey) => {
     setPage(1);
@@ -41,7 +32,48 @@ export const useUsersTable = () => {
     }
   };
 
+  const toggleStatus = (userId: number) => {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId
+          ? { ...u, status: u.status === "active" ? "inactive" : "active" }
+          : u,
+      ),
+    );
+  };
+
+  const handleDeleteUser = (user: User) => {
+    setDeleteUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (!deleteUser) return;
+
+    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+    setDeleteUser(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  // ===== derived data =====
+
+  const processedUsers = useMemo(() => {
+    const filtered = filterItems(users, search, [
+      "name",
+      "email",
+      "role",
+      "status",
+    ]);
+    return sortItems(filtered, sortBy, sortDirection);
+  }, [users, search, sortBy, sortDirection]);
+
+  const paginatedUsers = useMemo(
+    () => paginate(processedUsers, page, PAGE_SIZE),
+    [processedUsers, page],
+  );
+
   return {
+    // data
     users: paginatedUsers,
     total: processedUsers.length,
     page,
@@ -50,8 +82,19 @@ export const useUsersTable = () => {
     sortBy,
     sortDirection,
 
+    // modal state
+    deleteUser,
+    isDeleteModalOpen,
+
+    // setters
     setSearch,
     setPage,
+    setIsDeleteModalOpen,
+
+    // actions
     handleSort,
+    toggleStatus,
+    handleDeleteUser,
+    confirmDeleteUser,
   };
 };
