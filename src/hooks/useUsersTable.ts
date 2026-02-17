@@ -9,18 +9,25 @@ import { useMemo, useState } from "react";
 const PAGE_SIZE = 5;
 
 export const useUsersTable = () => {
+  // ===== data =====
   const [users, setUsers] = useState<User[]>(usersDB);
 
+  // ===== table state =====
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<UserSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
-  // modal state
+  // ===== modal state =====
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // ===== actions =====
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setPage(1); // UX polish
+  };
 
   const handleSort = (key: UserSortKey) => {
     setPage(1);
@@ -42,7 +49,7 @@ export const useUsersTable = () => {
     );
   };
 
-  const handleDeleteUser = (user: User) => {
+  const openDeleteModal = (user: User) => {
     setDeleteUser(user);
     setIsDeleteModalOpen(true);
   };
@@ -51,6 +58,11 @@ export const useUsersTable = () => {
     if (!deleteUser) return;
 
     setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+    setDeleteUser(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const closeDeleteModal = () => {
     setDeleteUser(null);
     setIsDeleteModalOpen(false);
   };
@@ -64,6 +76,7 @@ export const useUsersTable = () => {
       "role",
       "status",
     ]);
+
     return sortItems(filtered, sortBy, sortDirection);
   }, [users, search, sortBy, sortDirection]);
 
@@ -82,19 +95,20 @@ export const useUsersTable = () => {
     sortBy,
     sortDirection,
 
-    // modal state
+    // modal
     deleteUser,
     isDeleteModalOpen,
 
-    // setters
-    setSearch,
-    setPage,
-    setIsDeleteModalOpen,
-
-    // actions
+    // handlers
+    handleSearch,
     handleSort,
     toggleStatus,
-    handleDeleteUser,
+    openDeleteModal,
     confirmDeleteUser,
+    closeDeleteModal,
+
+    // setters (needed by Pagination / Modal)
+    setPage,
+    setIsDeleteModalOpen,
   };
 };
