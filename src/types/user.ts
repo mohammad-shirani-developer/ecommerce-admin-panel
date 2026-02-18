@@ -8,4 +8,8 @@ export interface User {
   status: UserStatus;
 }
 
-export type CreateUserInput = Omit<User, "id">;
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  role: "admin" | "user";
+}
