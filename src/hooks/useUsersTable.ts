@@ -1,74 +1,32 @@
-import { usersDB } from "@/data/users";
+// hooks/useUsersTable.ts
+import { userService } from "@/services/userService";
 import { UserSortKey } from "@/types/table";
 import { User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const PAGE_SIZE = 5;
 
 export const useUsersTable = () => {
-  // ===== data =====
-  const [users, setUsers] = useState<User[]>(usersDB);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // ===== table state =====
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<UserSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
 
-  // ===== modal state =====
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  // ===== fetch =====
+  useEffect(() => {
+    userService.getAll().then((data) => {
+      setUsers(data);
+      setLoading(false);
+    });
+  }, []);
 
-  // ===== actions =====
-
-  const handleSearch = (value: string) => {
-    setSearch(value);
-    setPage(1); // UX polish
-  };
-
-  const handleSort = (key: UserSortKey) => {
-    setPage(1);
-    if (sortBy === key) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDirection("asc");
-    }
-  };
-
-  const toggleStatus = (userId: number) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId
-          ? { ...u, status: u.status === "active" ? "inactive" : "active" }
-          : u,
-      ),
-    );
-  };
-
-  const openDeleteModal = (user: User) => {
-    setDeleteUser(user);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDeleteUser = () => {
-    if (!deleteUser) return;
-
-    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
-    setDeleteUser(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const closeDeleteModal = () => {
-    setDeleteUser(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  // ===== derived data =====
-
+  // ===== derived =====
   const processedUsers = useMemo(() => {
     const filtered = filterItems(users, search, [
       "name",
@@ -85,6 +43,22 @@ export const useUsersTable = () => {
     [processedUsers, page],
   );
 
+  // ===== actions =====
+  const handleSort = (key: UserSortKey) => {
+    setPage(1);
+    if (sortBy === key) {
+      setSortDirection((p) => (p === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDirection("asc");
+    }
+  };
+
+  const deleteUser = async (id: number) => {
+    await userService.remove(id);
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+  };
+
   return {
     // data
     users: paginatedUsers,
@@ -94,21 +68,14 @@ export const useUsersTable = () => {
     search,
     sortBy,
     sortDirection,
+    loading,
 
-    // modal
-    deleteUser,
-    isDeleteModalOpen,
-
-    // handlers
-    handleSearch,
-    handleSort,
-    toggleStatus,
-    openDeleteModal,
-    confirmDeleteUser,
-    closeDeleteModal,
-
-    // setters (needed by Pagination / Modal)
+    // setters
+    setSearch,
     setPage,
-    setIsDeleteModalOpen,
+
+    // actions
+    handleSort,
+    deleteUser,
   };
 };

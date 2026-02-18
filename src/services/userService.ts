@@ -1,11 +1,12 @@
+// services/userService.ts
 import { usersDB } from "@/data/users";
 import { CreateUserInput, User } from "@/types/user";
 
 let users = [...usersDB];
 
-const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms = 500) => new Promise((res) => setTimeout(res, ms));
 
-export const usersService = {
+export const userService = {
   async getAll(): Promise<User[]> {
     await delay();
     return [...users];
@@ -13,11 +14,13 @@ export const usersService = {
 
   async create(data: CreateUserInput): Promise<User> {
     await delay();
+
     const newUser: User = {
       id: Date.now(),
-      status: "active",
       ...data,
+      status: "active",
     };
+
     users = [newUser, ...users];
     return newUser;
   },
