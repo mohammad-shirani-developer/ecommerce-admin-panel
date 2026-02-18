@@ -1,7 +1,7 @@
 // hooks/useUsersTable.ts
 import { userService } from "@/services/userService";
 import { UserSortKey } from "@/types/table";
-import { User } from "@/types/user";
+import { CreateUserInput, User } from "@/types/user";
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
@@ -10,13 +10,23 @@ import { useEffect, useMemo, useState } from "react";
 const PAGE_SIZE = 5;
 
 export const useUsersTable = () => {
+  // ===== data =====
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ===== table state =====
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<UserSortKey>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
+
+  // ===== modal state =====
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // ===== fetch =====
   useEffect(() => {
@@ -34,7 +44,6 @@ export const useUsersTable = () => {
       "role",
       "status",
     ]);
-
     return sortItems(filtered, sortBy, sortDirection);
   }, [users, search, sortBy, sortDirection]);
 
@@ -54,9 +63,36 @@ export const useUsersTable = () => {
     }
   };
 
-  const deleteUser = async (id: number) => {
-    await userService.remove(id);
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+  const handleCreateUser = async (data: CreateUserInput) => {
+    const created = await userService.create(data);
+    setUsers((prev) => [created, ...prev]);
+    setIsCreateModalOpen(false);
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveUser = async (updated: User) => {
+    await userService.update(updated);
+    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+    setEditUser(null);
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteUser = (user: User) => {
+    setDeleteUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deleteUser) return;
+
+    await userService.remove(deleteUser.id);
+    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+    setDeleteUser(null);
+    setIsDeleteModalOpen(false);
   };
 
   return {
@@ -70,12 +106,26 @@ export const useUsersTable = () => {
     sortDirection,
     loading,
 
+    // modal state
+    editUser,
+    deleteUser,
+    isEditModalOpen,
+    isDeleteModalOpen,
+    isCreateModalOpen,
+
     // setters
     setSearch,
     setPage,
+    setIsCreateModalOpen,
+    setIsEditModalOpen,
+    setIsDeleteModalOpen,
 
     // actions
     handleSort,
-    deleteUser,
+    handleCreateUser,
+    handleEditUser,
+    handleSaveUser,
+    handleDeleteUser,
+    confirmDeleteUser,
   };
 };
