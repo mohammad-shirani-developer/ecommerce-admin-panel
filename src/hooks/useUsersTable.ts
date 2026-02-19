@@ -63,6 +63,16 @@ export const useUsersTable = () => {
     }
   };
 
+  const toggleStatus = (userId: number) => {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId
+          ? { ...u, status: u.status === "active" ? "inactive" : "active" }
+          : u,
+      ),
+    );
+  };
+
   const handleCreateUser = async (data: CreateUserInput) => {
     const created = await userService.create(data);
     setUsers((prev) => [created, ...prev]);
@@ -127,5 +137,6 @@ export const useUsersTable = () => {
     handleSaveUser,
     handleDeleteUser,
     confirmDeleteUser,
+    toggleStatus,
   };
 };

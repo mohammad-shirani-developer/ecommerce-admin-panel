@@ -1,19 +1,21 @@
 "use client";
 
 import ConfirmModal from "@/components/common/ConfirmModal";
-import DataTable, { Column } from "@/components/common/DataTable";
+import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
 import EmptyState from "@/components/EmptyState";
-import UserStatusBadge from "@/components/users/UserStatusBadge";
+
+import CreateUserForm from "@/components/users/CreateUserForm";
+import EditUserForm from "@/components/users/EditUserForm";
+import UsersTable from "@/components/users/UsersTable";
+
 import UsersToolbar from "@/components/users/UsersToolbar";
 
 import { useUsersTable } from "@/hooks/useUsersTable";
-import { UserSortKey } from "@/types/table";
-import { User } from "@/types/user";
-import { MdDelete } from "react-icons/md";
 
 const UsersPage = () => {
   const {
+    // data
     users,
     total,
     page,
@@ -21,50 +23,35 @@ const UsersPage = () => {
     search,
     sortBy,
     sortDirection,
+    loading,
 
+    // modal state
+    editUser,
     deleteUser,
+    isEditModalOpen,
     isDeleteModalOpen,
+    isCreateModalOpen,
 
+    // setters
     setSearch,
     setPage,
+    setIsCreateModalOpen,
+    setIsEditModalOpen,
     setIsDeleteModalOpen,
 
-    toggleStatus,
+    // actions
     handleSort,
+    handleCreateUser,
+    handleEditUser,
+    handleSaveUser,
     handleDeleteUser,
     confirmDeleteUser,
+    toggleStatus,
   } = useUsersTable();
-
-  const columns: Column<User, UserSortKey>[] = [
-    { key: "id", label: "ID", sortable: true },
-    { key: "name", label: "نام", sortable: true },
-    { key: "email", label: "ایمیل", sortable: true },
-    { key: "role", label: "نقش", sortable: true },
-    {
-      key: "status",
-      label: "وضعیت",
-      sortable: true,
-      render: (user) => (
-        <UserStatusBadge
-          status={user.status}
-          onClick={() => toggleStatus(user.id)}
-        />
-      ),
-    },
-    {
-      key: "id",
-      label: "عملیات",
-      render: (user) => (
-        <button onClick={() => handleDeleteUser(user)}>
-          <MdDelete className="text-xl text-gray-400 hover:text-red-500" />
-        </button>
-      ),
-    },
-  ];
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">کاربران</h1>
+      <h1 className="mb-4 text-2xl font-bold">کاربران</h1>
 
       <UsersToolbar
         searchValue={search}
@@ -72,30 +59,49 @@ const UsersPage = () => {
           setSearch(value);
           setPage(1);
         }}
+        setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {users.length === 0 ? (
+      {!loading && users.length === 0 && (
         <EmptyState message="هیچ کاربری یافت نشد." />
-      ) : (
-        <>
-          <DataTable<User, UserSortKey>
-            data={users}
-            columns={columns}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-          />
-
-          <Pagination
-            total={total}
-            pageSize={pageSize}
-            currentPage={page}
-            onPageChange={setPage}
-          />
-        </>
       )}
 
-      {/* Delete Modal */}
+      <UsersTable
+        users={users}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        onEdit={handleEditUser}
+        onDelete={handleDeleteUser}
+        onToggleStatus={toggleStatus}
+      />
+
+      <Pagination
+        total={total}
+        pageSize={pageSize}
+        currentPage={page}
+        onPageChange={setPage}
+      />
+
+      {/* Create */}
+      <FormModal
+        isOpen={isCreateModalOpen}
+        title="افزودن کاربر"
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <CreateUserForm onCreate={handleCreateUser} />
+      </FormModal>
+
+      {/* Edit */}
+      <FormModal
+        isOpen={isEditModalOpen}
+        title="ویرایش کاربر"
+        onClose={() => setIsEditModalOpen(false)}
+      >
+        <EditUserForm user={editUser} onSave={handleSaveUser} />
+      </FormModal>
+
+      {/* Delete */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="حذف کاربر"
