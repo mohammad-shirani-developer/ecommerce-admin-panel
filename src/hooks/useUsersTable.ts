@@ -1,142 +1,111 @@
-// hooks/useUsersTable.ts
+import { useDataTable } from "@/hooks/useDataTable";
 import { userService } from "@/services/userService";
+
 import { UserSortKey } from "@/types/table";
 import { CreateUserInput, User } from "@/types/user";
-import { filterItems } from "@/utils/filterItems";
-import { paginate } from "@/utils/paginate";
-import { sortItems } from "@/utils/sortItems";
-import { useEffect, useMemo, useState } from "react";
-
-const PAGE_SIZE = 5;
+import { useEffect, useState } from "react";
 
 export const useUsersTable = () => {
-  // ===== data =====
+  // ===== users state =====
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // ===== table state =====
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<UserSortKey>("id");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   // ===== modal state =====
-  const [editUser, setEditUser] = useState<User | null>(null);
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // ===== fetch =====
-  useEffect(() => {
-    userService.getAll().then((data) => {
+  // ===== fetch users =====
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await userService.getAll();
       setUsers(data);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
       setLoading(false);
-    });
-  }, []);
-
-  // ===== derived =====
-  const processedUsers = useMemo(() => {
-    const filtered = filterItems(users, search, [
-      "name",
-      "email",
-      "role",
-      "status",
-    ]);
-    return sortItems(filtered, sortBy, sortDirection);
-  }, [users, search, sortBy, sortDirection]);
-
-  const paginatedUsers = useMemo(
-    () => paginate(processedUsers, page, PAGE_SIZE),
-    [processedUsers, page],
-  );
-
-  // ===== actions =====
-  const handleSort = (key: UserSortKey) => {
-    setPage(1);
-    if (sortBy === key) {
-      setSortDirection((p) => (p === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDirection("asc");
     }
   };
 
-  const toggleStatus = (userId: number) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId
-          ? { ...u, status: u.status === "active" ? "inactive" : "active" }
-          : u,
-      ),
-    );
-  };
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
+  // ===== use generic table hook =====
+  const table = useDataTable<User, UserSortKey>({
+    data: users,
+    searchableKeys: ["name", "email", "role", "status"],
+    initialSortBy: "id",
+    pageSize: 5,
+  });
+
+  // ===== CRUD =====
   const handleCreateUser = async (data: CreateUserInput) => {
-    const created = await userService.create(data);
-    setUsers((prev) => [created, ...prev]);
-    setIsCreateModalOpen(false);
+    try {
+      setLoading(true);
+      const newUser = await userService.create(data);
+      setUsers((prev) => [newUser, ...prev]);
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("Create user failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditUser = (user: User) => {
-    setEditUser(user);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveUser = async (updated: User) => {
-    await userService.update(updated);
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
-    setEditUser(null);
-    setIsEditModalOpen(false);
+  const handleEditUser = async (updatedUser: User) => {
+    try {
+      setLoading(true);
+      const user = await userService.update(updatedUser);
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? user : u)));
+    } catch (error) {
+      console.error("Update user failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteUser = (user: User) => {
-    setDeleteUser(user);
+    setSelectedUser(user);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteUser = async () => {
-    if (!deleteUser) return;
+  const confirmDelete = async () => {
+    if (!selectedUser) return;
 
-    await userService.remove(deleteUser.id);
-    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
-    setDeleteUser(null);
-    setIsDeleteModalOpen(false);
+    try {
+      setLoading(true);
+      await userService.remove(selectedUser.id);
+      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+      setIsDeleteModalOpen(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Delete user failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ===== exposed API =====
   return {
-    // data
-    users: paginatedUsers,
-    total: processedUsers.length,
-    page,
-    pageSize: PAGE_SIZE,
-    search,
-    sortBy,
-    sortDirection,
+    ...table,
+
+    users: table.data, // برای سازگاری با کامپوننت قبلی
+
     loading,
 
-    // modal state
-    editUser,
-    deleteUser,
-    isEditModalOpen,
-    isDeleteModalOpen,
     isCreateModalOpen,
-
-    // setters
-    setSearch,
-    setPage,
     setIsCreateModalOpen,
-    setIsEditModalOpen,
+
+    isDeleteModalOpen,
     setIsDeleteModalOpen,
 
-    // actions
-    handleSort,
+    selectedUser,
+
     handleCreateUser,
     handleEditUser,
-    handleSaveUser,
     handleDeleteUser,
-    confirmDeleteUser,
-    toggleStatus,
+    confirmDelete,
   };
 };
