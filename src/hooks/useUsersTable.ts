@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
+
 import { useDataTable } from "@/hooks/useDataTable";
 import { userService } from "@/services/userService";
-
 import { UserSortKey } from "@/types/table";
 import { CreateUserInput, User } from "@/types/user";
-import { useEffect, useState } from "react";
 
 export const useUsersTable = () => {
   // ===== users state =====
