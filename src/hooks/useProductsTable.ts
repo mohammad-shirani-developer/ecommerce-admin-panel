@@ -1,128 +1,112 @@
-import { productsDB as mockProducts } from "@/data/products";
+import { useDataTable } from "@/hooks/useDataTable";
+import { productsService } from "@/services/productService";
 import { CreateProductInput, Product } from "@/types/product";
 import { ProductSortKey } from "@/types/table";
-import { filterItems } from "@/utils/filterItems";
-import { paginate } from "@/utils/paginate";
-import { sortItems } from "@/utils/sortItems";
-import { useMemo, useState } from "react";
-
-const PAGE_SIZE = 5;
+import { useEffect, useState } from "react";
 
 export const useProductsTable = () => {
   // ===== state =====
-  const [search, setSearch] = useState("");
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [sortBy, setSortBy] = useState<ProductSortKey>("id");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [page, setPage] = useState(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const [editProduct, setEditProduct] = useState<Product | null>(null);
-  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  // ===== modal state =====
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // ===== actions =====
-  const toggleStatus = (productId: number) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === productId
-          ? { ...p, status: p.status === "active" ? "inactive" : "active" }
-          : p,
-      ),
-    );
-  };
-
-  const handleSort = (key: ProductSortKey) => {
-    setPage(1);
-    if (sortBy === key) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDirection("asc");
+  // ===== fetch =====
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await productsService.getAll();
+      setProducts(data);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCreateProduct = (data: CreateProductInput) => {
-    const nextId =
-      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-    setProducts((prev) => [{ id: nextId, ...data }, ...prev]);
-    setIsCreateModalOpen(false);
+  // ===== generic table =====
+  const table = useDataTable<Product, ProductSortKey>({
+    data: products,
+    searchableKeys: ["name", "category", "status"],
+    initialSortBy: "id",
+    pageSize: 5,
+  });
+
+  // ===== CRUD =====
+  const handleCreateProduct = async (data: CreateProductInput) => {
+    try {
+      setLoading(true);
+      const newProduct = await productsService.create(data);
+      setProducts((prev) => [newProduct, ...prev]);
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("Create product failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditProduct = (product: Product) => {
-    setEditProduct(product);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveProduct = (updated: Product) => {
-    setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-    setEditProduct(null);
-    setIsEditModalOpen(false);
+  const handleEditProduct = async (updated: Product) => {
+    try {
+      setLoading(true);
+      const product = await productsService.update(updated);
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? product : p)),
+      );
+    } catch (error) {
+      console.error("Update product failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteProduct = (product: Product) => {
-    setDeleteProduct(product);
+    setSelectedProduct(product);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteProduct = () => {
-    if (!deleteProduct) return;
+  const confirmDelete = async () => {
+    if (!selectedProduct) return;
 
-    setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-    setDeleteProduct(null);
-    setIsDeleteModalOpen(false);
+    try {
+      setLoading(true);
+      await productsService.remove(selectedProduct.id);
+      setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id));
+      setIsDeleteModalOpen(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error("Delete product failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ===== derived data =====
-  const processedProducts = useMemo(() => {
-    const filtered = filterItems(products, search, [
-      "name",
-      "category",
-      "status",
-    ]);
-    return sortItems(filtered, sortBy, sortDirection);
-  }, [products, search, sortBy, sortDirection]);
-
-  const paginatedProducts = useMemo(
-    () => paginate(processedProducts, page, PAGE_SIZE),
-    [processedProducts, page],
-  );
-
-  // ===== return =====
+  // ===== exposed =====
   return {
-    // data
-    products: paginatedProducts,
-    total: processedProducts.length,
-    page,
-    pageSize: PAGE_SIZE,
-    search,
-    sortBy,
-    sortDirection,
+    ...table,
 
-    // modal state
-    editProduct,
-    deleteProduct,
-    isEditModalOpen,
-    isDeleteModalOpen,
+    products: table.data, // سازگاری با کامپوننت
+
+    loading,
+
     isCreateModalOpen,
-
-    // setters
-    setSearch,
-    setPage,
     setIsCreateModalOpen,
-    setIsEditModalOpen,
+
+    isDeleteModalOpen,
     setIsDeleteModalOpen,
 
-    // actions
-    toggleStatus,
-    handleSort,
+    selectedProduct,
+
     handleCreateProduct,
     handleEditProduct,
-    handleSaveProduct,
     handleDeleteProduct,
-    confirmDeleteProduct,
+    confirmDelete,
   };
 };
