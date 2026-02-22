@@ -1,70 +1,42 @@
-"use client";
-
-import ConfirmModal from "@/components/common/ConfirmModal";
-import FormModal from "@/components/common/FormModal";
 import Pagination from "@/components/common/Pagination";
-import EmptyState from "@/components/EmptyState";
-
-import CreateUserForm from "@/components/users/CreateUserForm";
-import EditUserForm from "@/components/users/EditUserForm";
+import CreateUserModal from "@/components/users/CreateUsersModal";
+import DeleteUserModal from "@/components/users/DeleteUsersModal";
 import UsersTable from "@/components/users/UsersTable";
-
 import UsersToolbar from "@/components/users/UsersToolbar";
-
 import { useUsersTable } from "@/hooks/useUsersTable";
 
-const UsersPage = () => {
+export const UsersPage = () => {
   const {
-    // data
-    users,
+    data: users,
     total,
+    search,
     page,
     pageSize,
-    search,
     sortBy,
     sortDirection,
-    loading,
-
-    // modal state
-    editUser,
-    deleteUser,
-    isEditModalOpen,
-    isDeleteModalOpen,
-    isCreateModalOpen,
-
-    // setters
     setSearch,
     setPage,
-    setIsCreateModalOpen,
-    setIsEditModalOpen,
-    setIsDeleteModalOpen,
-
-    // actions
     handleSort,
+    loading,
+    isCreateModalOpen,
+    setIsCreateModalOpen,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    selectedUser,
     handleCreateUser,
     handleEditUser,
-    handleSaveUser,
+    handleToggleStatus,
     handleDeleteUser,
-    confirmDeleteUser,
-    toggleStatus,
+    confirmDelete,
   } = useUsersTable();
 
   return (
-    <div className="p-4">
-      <h1 className="mb-4 text-2xl font-bold">کاربران</h1>
-
+    <>
       <UsersToolbar
         searchValue={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
-
-      {!loading && users.length === 0 && (
-        <EmptyState message="هیچ کاربری یافت نشد." />
-      )}
 
       <UsersTable
         users={users}
@@ -73,8 +45,24 @@ const UsersPage = () => {
         onSort={handleSort}
         onEdit={handleEditUser}
         onDelete={handleDeleteUser}
-        onToggleStatus={toggleStatus}
+        onToggleStatus={handleToggleStatus}
       />
+
+      {isCreateModalOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreate={handleCreateUser}
+        />
+      )}
+
+      {isDeleteModalOpen && selectedUser && (
+        <DeleteUserModal
+          user={selectedUser}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
+          loading={loading}
+        />
+      )}
 
       <Pagination
         total={total}
@@ -82,36 +70,6 @@ const UsersPage = () => {
         currentPage={page}
         onPageChange={setPage}
       />
-
-      {/* Create */}
-      <FormModal
-        isOpen={isCreateModalOpen}
-        title="افزودن کاربر"
-        onClose={() => setIsCreateModalOpen(false)}
-      >
-        <CreateUserForm onCreate={handleCreateUser} />
-      </FormModal>
-
-      {/* Edit */}
-      <FormModal
-        isOpen={isEditModalOpen}
-        title="ویرایش کاربر"
-        onClose={() => setIsEditModalOpen(false)}
-      >
-        <EditUserForm user={editUser} onSave={handleSaveUser} />
-      </FormModal>
-
-      {/* Delete */}
-      <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        title="حذف کاربر"
-        message={`آیا از حذف ${deleteUser?.name} مطمئن هستید؟`}
-        confirmText="حذف"
-        onCancel={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDeleteUser}
-      />
-    </div>
+    </>
   );
 };
-
-export default UsersPage;

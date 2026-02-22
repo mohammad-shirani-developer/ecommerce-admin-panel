@@ -1,16 +1,10 @@
 import { filterItems } from "@/utils/filterItems";
 import { paginate } from "@/utils/paginate";
 import { sortItems } from "@/utils/sortItems";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-/**
- * جهت مرتب‌سازی
- */
 export type SortDirection = "asc" | "desc";
 
-/**
- * تنظیمات hook
- */
 interface UseDataTableOptions<T, SortKey extends keyof T> {
   data: T[];
   searchableKeys: (keyof T)[];
@@ -18,23 +12,21 @@ interface UseDataTableOptions<T, SortKey extends keyof T> {
   pageSize?: number;
 }
 
-/**
- * Generic Data Table Hook
- * قابل استفاده برای Users / Products / هر دیتای دیگر
- */
 export const useDataTable = <T, SortKey extends keyof T>({
   data,
   searchableKeys,
   initialSortBy,
   pageSize = 5,
 }: UseDataTableOptions<T, SortKey>) => {
-  // ===== state =====
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortKey>(initialSortBy);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  // ===== processed data =====
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
   const processedData = useMemo(() => {
     const filtered = filterItems(data, search, searchableKeys);
     return sortItems(filtered, sortBy, sortDirection);
@@ -45,7 +37,6 @@ export const useDataTable = <T, SortKey extends keyof T>({
     [processedData, page, pageSize],
   );
 
-  // ===== actions =====
   const handleSort = (key: SortKey) => {
     setPage(1);
 
@@ -57,24 +48,18 @@ export const useDataTable = <T, SortKey extends keyof T>({
     }
   };
 
-  // ===== exposed API =====
   return {
-    // data
     data: paginatedData,
     total: processedData.length,
 
-    // state
     search,
     page,
     pageSize,
     sortBy,
     sortDirection,
 
-    // setters
     setSearch,
     setPage,
-
-    // actions
     handleSort,
   };
 };

@@ -1,21 +1,18 @@
-import { useEffect, useState } from "react";
-
 import { useDataTable } from "@/hooks/useDataTable";
 import { userService } from "@/services/userService";
+
 import { UserSortKey } from "@/types/table";
 import { CreateUserInput, User } from "@/types/user";
+import { useEffect, useState } from "react";
 
 export const useUsersTable = () => {
-  // ===== users state =====
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // ===== modal state =====
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // ===== fetch users =====
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -32,35 +29,48 @@ export const useUsersTable = () => {
     fetchUsers();
   }, []);
 
-  // ===== use generic table hook =====
   const table = useDataTable<User, UserSortKey>({
     data: users,
     searchableKeys: ["name", "email", "role", "status"],
     initialSortBy: "id",
-    pageSize: 5,
   });
 
-  // ===== CRUD =====
   const handleCreateUser = async (data: CreateUserInput) => {
     try {
       setLoading(true);
       const newUser = await userService.create(data);
       setUsers((prev) => [newUser, ...prev]);
       setIsCreateModalOpen(false);
-    } catch (error) {
-      console.error("Create user failed:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditUser = async (updatedUser: User) => {
+  const handleToggleStatus = async (userId: number) => {
+    const user = users.find((u) => u.id === userId);
+    if (!user) return;
+
     try {
       setLoading(true);
-      const user = await userService.update(updatedUser);
+
+      const updatedUser = await userService.update({
+        ...user,
+        status: user.status === "active" ? "inactive" : "active",
+      });
+
+      setUsers((prev) =>
+        prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditUser = async (updated: User) => {
+    try {
+      setLoading(true);
+      const user = await userService.update(updated);
       setUsers((prev) => prev.map((u) => (u.id === user.id ? user : u)));
-    } catch (error) {
-      console.error("Update user failed:", error);
     } finally {
       setLoading(false);
     }
@@ -80,18 +90,24 @@ export const useUsersTable = () => {
       setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
       setIsDeleteModalOpen(false);
       setSelectedUser(null);
-    } catch (error) {
-      console.error("Delete user failed:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== exposed API =====
   return {
-    ...table,
+    data: table.data,
+    total: table.total,
 
-    users: table.data, // برای سازگاری با کامپوننت قبلی
+    search: table.search,
+    page: table.page,
+    pageSize: table.pageSize,
+    sortBy: table.sortBy,
+    sortDirection: table.sortDirection,
+
+    setSearch: table.setSearch,
+    setPage: table.setPage,
+    handleSort: table.handleSort,
 
     loading,
 
@@ -106,6 +122,7 @@ export const useUsersTable = () => {
     handleCreateUser,
     handleEditUser,
     handleDeleteUser,
+    handleToggleStatus,
     confirmDelete,
   };
 };
