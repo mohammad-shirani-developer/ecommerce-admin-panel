@@ -12,4 +12,5 @@ export interface CreateUserInput {
   name: string;
   email: string;
   role: "admin" | "user";
+  status: UserStatus;
 }
