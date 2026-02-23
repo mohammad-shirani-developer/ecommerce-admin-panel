@@ -1,3 +1,4 @@
+"use client";
 import { useDataTable } from "@/hooks/useDataTable";
 import { userService } from "@/services/userService";
 

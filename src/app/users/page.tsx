@@ -1,3 +1,4 @@
+"use client";
 import Pagination from "@/components/common/Pagination";
 import CreateUserModal from "@/components/users/CreateUsersModal";
 import DeleteUserModal from "@/components/users/DeleteUsersModal";
@@ -5,7 +6,7 @@ import UsersTable from "@/components/users/UsersTable";
 import UsersToolbar from "@/components/users/UsersToolbar";
 import { useUsersTable } from "@/hooks/useUsersTable";
 
-export const UsersPage = () => {
+const UsersPage = () => {
   const {
     data: users,
     total,
@@ -73,3 +74,5 @@ export const UsersPage = () => {
     </>
   );
 };
+
+export default UsersPage;

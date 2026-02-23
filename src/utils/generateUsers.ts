@@ -12,7 +12,6 @@ const firstNames = [
   "فاطمه",
   "نگین",
 ];
-
 const lastNames = [
   "احمدی",
   "رضایی",
@@ -33,7 +32,8 @@ export const generateUsers = (count: number): User[] => {
       id: index + 1,
       name: `${firstName} ${lastName}`,
       email: `${firstName}.${lastName}${index + 1}@example.com`.toLowerCase(),
-      status: Math.random() > 0.3 ? "active" : "inactive",
+      status: Math.random() > 0.3 ? "active" : "inactive", // ✅ مقداردهی UserStatus
+      role: Math.random() > 0.9 ? "admin" : "user", // ✅ random role
     };
   });
 };
