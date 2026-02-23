@@ -1,4 +1,3 @@
-import ErrorBoundary from "@/components/ErrorBoundary";
 import { Figtree } from "next/font/google";
 import localFont from "next/font/local";
 import { ToastContainer } from "react-toastify";
@@ -46,18 +45,16 @@ export default function RootLayout({
       className={`dark ${figtree.variable} ${vazirmatn.variable}`}
     >
       <body className="bg-gray-900 text-gray-100">
-        <ErrorBoundary>
-          {children}
+        {children}
 
-          {/* Global Toast */}
-          <ToastContainer
-            theme="dark"
-            position="top-right"
-            autoClose={3000}
-            newestOnTop
-            rtl
-          />
-        </ErrorBoundary>
+        {/* Global Toast */}
+        <ToastContainer
+          theme="dark"
+          position="top-right"
+          autoClose={3000}
+          newestOnTop
+          rtl
+        />
       </body>
     </html>
   );
