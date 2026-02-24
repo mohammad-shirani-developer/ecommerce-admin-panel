@@ -1,12 +1,11 @@
-import { useCrudTable } from "@/hooks/useCrudTable";
 import { userService } from "@/services/userService";
-import { UserSortKey } from "@/types/table";
 import { CreateUserInput, User } from "@/types/user";
+import { useCrudTable } from "./useCrudTable";
 
 export const useUsersTable = () =>
-  useCrudTable<User, CreateUserInput, UserSortKey>({
+  useCrudTable<User, CreateUserInput, keyof User>({
     service: userService,
     searchableKeys: ["name", "email", "role", "status"],
-    initialSortBy: "id",
+    initialSortBy: "name",
     pageSize: 5,
   });

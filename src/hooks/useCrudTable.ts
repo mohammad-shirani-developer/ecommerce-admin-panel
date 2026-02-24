@@ -57,6 +57,7 @@ export function useCrudTable<
     try {
       const data = await service.getAll();
       setItems(data);
+      console.log("Fetched:", data);
     } finally {
       setLoading(false);
     }
@@ -76,6 +77,8 @@ export function useCrudTable<
     initialSortBy,
     pageSize,
   });
+  console.log("Items state:", items);
+  console.log("Table data:", table.data);
 
   //
   // CRUD Handlers

@@ -12,7 +12,6 @@ import UserStatusBadge from "@/components/users/UserStatusBadge";
 import UsersToolbar from "@/components/users/UsersToolbar";
 
 import { useUsersTable } from "@/hooks/useUsersTable";
-import { UserSortKey } from "@/types/table";
 import { User } from "@/types/user";
 
 import { MdDelete, MdOutlineModeEdit } from "react-icons/md";
@@ -29,8 +28,7 @@ const UsersPage = () => {
     setSearch,
     setPage,
     handleSort,
-
-    //loading,
+    loading,
 
     isCreateModalOpen,
     setIsCreateModalOpen,
@@ -49,7 +47,7 @@ const UsersPage = () => {
     confirmDelete,
   } = useUsersTable();
 
-  const columns: Column<User, UserSortKey>[] = [
+  const columns: Column<User>[] = [
     { key: "id", label: "ID", sortable: true },
     { key: "name", label: "نام", sortable: true },
     { key: "email", label: "ایمیل", sortable: true },
@@ -80,6 +78,7 @@ const UsersPage = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">کاربران</h1>
 
+      {/* Toolbar */}
       <UsersToolbar
         searchValue={search}
         onSearchChange={(value) => {
@@ -89,12 +88,15 @@ const UsersPage = () => {
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {data.length === 0 ? (
+      {/* Loading / Empty / Table */}
+      {loading ? (
+        <div className="text-center py-10">در حال بارگذاری...</div>
+      ) : data.length === 0 ? (
         <EmptyState message="هیچ کاربری یافت نشد." />
       ) : (
         <>
-          <DataTable<User, UserSortKey>
-            data={data}
+          <DataTable<User>
+            data={data} // مستقیم از hook می‌گیریم
             columns={columns}
             sortBy={sortBy}
             sortDirection={sortDirection}
@@ -109,6 +111,15 @@ const UsersPage = () => {
           />
         </>
       )}
+
+      {/* Create Modal */}
+      <FormModal
+        isOpen={isCreateModalOpen}
+        title="افزودن کاربر"
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <CreateUserForm onCreate={handleCreate} />
+      </FormModal>
 
       {/* Edit Modal */}
       <FormModal
@@ -128,15 +139,6 @@ const UsersPage = () => {
         onCancel={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
       />
-
-      {/* Create Modal */}
-      <FormModal
-        isOpen={isCreateModalOpen}
-        title="افزودن کاربر"
-        onClose={() => setIsCreateModalOpen(false)}
-      >
-        <CreateUserForm onCreate={handleCreate} />
-      </FormModal>
     </div>
   );
 };
