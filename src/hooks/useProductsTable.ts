@@ -70,16 +70,16 @@ export const useProductsTable = () => {
     setDeleteProduct(null);
   };
 
-  const toggleProductStatus = (status: ProductStatus): ProductStatus =>
-    status === "active" ? "inactive" : "active";
-
   const toggleStatus = async (id: number) => {
     const product = products.find((p) => p.id === id);
     if (!product) return;
 
-    const updated = {
+    const newStatus: ProductStatus =
+      product.status === "active" ? "inactive" : "active";
+
+    const updated: Product = {
       ...product,
-      status: toggleProductStatus(product.status),
+      status: newStatus,
     };
 
     await productsService.update(updated);
