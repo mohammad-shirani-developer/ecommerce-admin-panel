@@ -13,12 +13,11 @@ import ProductsToolbar from "@/components/products/ProductsToolbar";
 
 import { useProductsTable } from "@/hooks/useProductsTable";
 import { Product } from "@/types/product";
-import { ProductSortKey } from "@/types/table";
 import { MdDelete, MdOutlineModeEdit } from "react-icons/md";
 
 const ProductsPage = () => {
   const {
-    products,
+    data,
     total,
     page,
     pageSize,
@@ -26,8 +25,8 @@ const ProductsPage = () => {
     sortBy,
     sortDirection,
 
-    editProduct,
-    deleteProduct,
+    editItem,
+    deleteItem,
     isEditModalOpen,
     isDeleteModalOpen,
     isCreateModalOpen,
@@ -38,16 +37,15 @@ const ProductsPage = () => {
     setIsEditModalOpen,
     setIsDeleteModalOpen,
 
-    toggleStatus,
     handleSort,
-    handleCreateProduct,
-    handleEditProduct,
-    handleSaveProduct,
-    handleDeleteProduct,
-    confirmDeleteProduct,
+    handleCreate,
+    handleEdit,
+    handleSave,
+    handleDelete,
+    confirmDelete,
   } = useProductsTable();
 
-  const columns: Column<Product, ProductSortKey>[] = [
+  const columns: Column<Product>[] = [
     { key: "id", label: "ID", sortable: true },
     { key: "name", label: "نام", sortable: true },
     { key: "price", label: "قیمت", sortable: true },
@@ -56,22 +54,17 @@ const ProductsPage = () => {
       key: "status",
       label: "وضعیت",
       sortable: true,
-      render: (product) => (
-        <ProductStatusBadge
-          status={product.status}
-          onClick={() => toggleStatus(product.id)}
-        />
-      ),
+      render: (product) => <ProductStatusBadge status={product.status} />,
     },
     {
       key: "id",
       label: "عملیات",
       render: (product) => (
         <div className="flex gap-2">
-          <button onClick={() => handleEditProduct(product)}>
+          <button onClick={() => handleEdit(product)}>
             <MdOutlineModeEdit className="text-xl text-gray-400 hover:text-white" />
           </button>
-          <button onClick={() => handleDeleteProduct(product)}>
+          <button onClick={() => handleDelete(product)}>
             <MdDelete className="text-xl text-gray-400 hover:text-red-500" />
           </button>
         </div>
@@ -92,12 +85,12 @@ const ProductsPage = () => {
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {products.length === 0 ? (
+      {data.length === 0 ? (
         <EmptyState message="هیچ محصولی یافت نشد." />
       ) : (
         <>
-          <DataTable<Product, ProductSortKey>
-            data={products}
+          <DataTable<Product>
+            data={data}
             columns={columns}
             sortBy={sortBy}
             sortDirection={sortDirection}
@@ -119,17 +112,17 @@ const ProductsPage = () => {
         title="ویرایش محصول"
         onClose={() => setIsEditModalOpen(false)}
       >
-        <EditProductForm product={editProduct} onSave={handleSaveProduct} />
+        <EditProductForm product={editItem} onSave={handleSave} />
       </FormModal>
 
       {/* Delete */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="حذف محصول"
-        message={`آیا از حذف ${deleteProduct?.name} مطمئن هستید؟`}
+        message={`آیا از حذف ${deleteItem?.name} مطمئن هستید؟`}
         confirmText="حذف"
         onCancel={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDeleteProduct}
+        onConfirm={confirmDelete}
       />
 
       {/* Create */}
@@ -138,7 +131,7 @@ const ProductsPage = () => {
         title="افزودن محصول"
         onClose={() => setIsCreateModalOpen(false)}
       >
-        <CreateProductForm onCreate={handleCreateProduct} />
+        <CreateProductForm onCreate={handleCreate} />
       </FormModal>
     </div>
   );
