@@ -40,7 +40,7 @@ const DashboardPage = () => {
     );
   }
 
-  if (products.length === 0 || users.length === 0) {
+  if (!products?.length && !users?.length) {
     return <EmptyState message="داده‌ای برای نمایش وجود ندارد" />;
   }
 
@@ -49,8 +49,8 @@ const DashboardPage = () => {
   const salesData = adaptProductsToSalesChart(products);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4">داشبورد</h2>
+    <div className="p-6 space-y-6">
+      <h2 className="text-2xl font-bold ">داشبورد</h2>
 
       <StatsGrid stats={stats} />
 
